@@ -1,0 +1,2502 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Hiệu Suất Kinh Doanh</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --black:#1a1a2e; --black2:#16213e;
+  --pink:#e91e8c; --pink2:#d4158a; --pink-light:#fce4f3; --pink-pale:#fdf0f9;
+  --teal:#0ab5a0; --amber:#d4960a; --blue:#3b6fd4; --purple:#6b3fa0;
+  --green:#12a372; --red:#e53030;
+  --surface:#ffffff; --bg:#f5f5f8;
+  --border:#e8ddf0; --border-card:#e0e0ec;
+  --text:#1a1a2e; --text2:#5a5a7a; --text3:#a0a0c0;
+  --radius:8px; --radius-sm:5px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;min-height:100vh;}
+
+/* ── TOP NAV ── */
+.topnav{background:var(--black);height:44px;display:flex;align-items:center;padding:0 20px;gap:0;position:sticky;top:0;z-index:200;}
+.brand{font-size:16px;font-weight:800;font-style:italic;color:#fff;margin-right:18px;letter-spacing:-0.5px;}
+.nav-sep{color:rgba(255,255,255,0.25);margin:0 14px;font-size:18px;}
+.nav-label{color:rgba(255,255,255,0.5);font-size:12px;}
+.nav-tabs{display:flex;gap:0;margin-left:18px;}
+.nav-tab{display:flex;align-items:center;gap:6px;padding:0 18px;height:44px;color:rgba(255,255,255,0.5);font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav-tab.active{color:#fff;border-bottom-color:var(--pink);}
+.nav-tab .num{background:var(--pink);color:#fff;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;}
+.nav-tab.active2 .num{background:#555;}
+.nav-right{margin-left:auto;display:flex;gap:8px;}
+.nav-pill{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.75);padding:4px 12px;border-radius:4px;font-size:11px;cursor:pointer;}
+
+/* ── SUBHEADER ── */
+.subheader{background:var(--pink);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;}
+.subheader-left h2{font-size:15px;font-weight:700;color:#fff;}
+.subheader-left p{font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px;}
+.subheader-pills{display:flex;gap:8px;}
+.sh-pill{background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;}
+
+/* ── FILTERS ── */
+.filters{background:#fff;border-bottom:1px solid var(--border-card);padding:8px 20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.filter-label{color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600;}
+.filter-group{display:flex;align-items:center;gap:6px;}
+select,input[type=date]{background:#fff;border:1px solid var(--border-card);color:var(--text);padding:4px 10px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;outline:none;transition:border 0.2s;}
+select:hover,input[type=date]:hover{border-color:var(--pink);}
+.filter-sep{color:var(--text3);}
+.btn-reset{background:transparent;border:1px solid var(--border-card);color:var(--text2);padding:4px 12px;border-radius:var(--radius-sm);font-size:11px;cursor:pointer;transition:all 0.2s;}
+.btn-reset:hover{border-color:var(--pink);color:var(--pink);}
+
+/* ── MAIN ── */
+.main{padding:16px 20px;display:flex;flex-direction:column;gap:14px;}
+
+/* ── KPI CARDS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+.kpi-card{background:#fff;border:1px solid var(--border-card);border-top:3px solid;border-radius:var(--radius);padding:14px 16px;transition:box-shadow 0.2s;}
+.kpi-card:hover{box-shadow:0 3px 14px rgba(0,0,0,0.08);}
+.kpi-card.k1{border-top-color:var(--pink);}
+.kpi-card.k2{border-top-color:var(--teal);}
+.kpi-card.k3{border-top-color:var(--amber);}
+.kpi-card.k4{border-top-color:var(--blue);}
+.kpi-card.k5{border-top-color:var(--purple);}
+.kpi-card.k6{border-top-color:#e53030;}
+.kpi-label{font-size:10px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;}
+.kpi-value{font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1;color:var(--text);}
+.kpi-trend{display:flex;align-items:center;gap:3px;margin-top:5px;font-size:11px;}
+.trend-up{color:var(--green);font-weight:600;} .trend-down{color:var(--red);font-weight:600;}
+.kpi-sub{color:var(--text3);font-size:10px;}
+
+/* ── CHART CARDS ── */
+.row2-grid{display:grid;grid-template-columns:2fr 1fr;gap:12px;}
+.row3-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.row4-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.chart-card{background:#fff;border:1px solid var(--border-card);border-radius:var(--radius);padding:16px;}
+.chart-head{margin-bottom:10px;}
+.chart-title{font-size:13px;font-weight:700;color:var(--text);}
+.chart-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.chart-header-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.chart-filters{display:flex;gap:5px;flex-wrap:wrap;}
+.toggle-btn{background:var(--pink-pale);border:1px solid #e8c8dd;color:var(--text2);padding:3px 10px;border-radius:20px;font-size:11px;cursor:pointer;transition:all 0.18s;font-weight:500;}
+.toggle-btn.active{background:var(--pink);border-color:var(--pink);color:#fff;font-weight:600;}
+.toggle-btn:hover:not(.active){background:var(--pink-light);}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.legend-line{width:16px;height:2px;flex-shrink:0;}
+.legend-dash{width:16px;height:0;border-top:2px dashed;flex-shrink:0;}
+.chart-wrap{position:relative;width:100%;height:230px;}
+.chart-wrap-sm{position:relative;width:100%;height:200px;}
+
+/* ── FUNNEL ── */
+.funnel-wrap{padding:2px 0;}
+.funnel-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.funnel-label-col{font-size:11px;color:var(--text2);width:80px;flex-shrink:0;font-weight:500;}
+.funnel-track{flex:1;height:24px;background:#f5f0fa;border-radius:4px;overflow:hidden;}
+.funnel-fill{height:100%;display:flex;align-items:center;padding-left:8px;transition:width 0.8s cubic-bezier(.4,0,.2,1);}
+.funnel-pct{font-size:11px;font-weight:700;color:#fff;}
+.funnel-right{font-size:11px;color:var(--text2);width:72px;text-align:right;flex-shrink:0;}
+
+/* ── HEATMAP ── */
+.heatmap-container{width:100%;}
+.heatmap-table{border-collapse:collapse;font-size:10px;width:100%;table-layout:fixed;}
+.heatmap-table th{color:var(--text3);font-weight:600;padding:3px 2px;text-align:center;white-space:nowrap;}
+.heatmap-table th.row-header{text-align:left;padding-right:4px;width:32px;color:var(--text2);}
+.hm-cell{height:22px;text-align:center;padding:2px 1px;border-radius:3px;font-weight:600;cursor:default;font-size:9.5px;}
+.hm-cell:hover{opacity:0.75;}
+
+/* ── MINI CARD ── */
+.mini-card{background:#fff;border:1px solid var(--border-card);border-radius:var(--radius);padding:14px 16px;}
+.mini-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.mini-sub{font-size:11px;color:var(--text3);margin-bottom:10px;}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <span class="nav-label">Báo Cáo Hiệu Suất Sale</span>
+  <div class="nav-tabs">
+    <div class="nav-tab active" id="tab1" onclick="showPage(1)"><span class="num">1</span> Tổng Quan</div>
+    <div class="nav-tab" id="tab2" onclick="showPage(2)"><span class="num" style="background:#0ab5a0;">2</span> HSKD</div>
+    <div class="nav-tab" id="tab3" onclick="showPage(3)"><span class="num" style="background:#3b6fd4;">3</span> Khách Hàng</div>
+    <div class="nav-tab" id="tab4" onclick="showPage(4)"><span class="num" style="background:#d4960a;">4</span> Marketing</div>
+    <div class="nav-tab" id="tab5" onclick="showPage(5)"><span class="num" style="background:#6b3fa0;">5</span> PP Phân Khúc KH</div>
+  </div>
+</div>
+
+<div id="page1">
+<!-- SUBHEADER -->
+<div class="subheader">
+  <div class="subheader-left">
+    <h2>Tổng Quan Hiệu Suất</h2>
+    <p>Doanh thu · Đơn hàng · Chuyển đổi · SLA · T6–T7/2025</p>
+  </div>
+  <div class="subheader-pills">
+    <span class="sh-pill">3.42 tỷ doanh thu</span>
+    <span class="sh-pill">4,420 đơn hàng</span>
+    <span class="sh-pill">4.2% chuyển đổi</span>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <div class="filter-group">
+    <span class="filter-label">Từ</span>
+    <input type="date" id="dateFrom" value="2024-01-01">
+    <span class="filter-sep">–</span>
+    <input type="date" id="dateTo" value="2024-12-31">
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Team</span>
+    <select id="teamFilter">
+      <option value="all">Tất cả team</option>
+      <option>Team 1</option><option>Team 2</option><option>Team 3</option>
+      <option>Team 4</option><option>Team 5</option>
+    </select>
+  </div>
+  <button class="btn-reset" onclick="resetFilters()">Đặt lại</button>
+</div>
+
+<div class="main">
+
+  <!-- ROW 1: KPI -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(7,1fr);">
+    <div class="kpi-card k1">
+      <div class="kpi-label">Tổng số KG</div>
+      <div class="kpi-value">72.6K</div>
+      <div class="kpi-trend"><span class="trend-up">▲ 18.2%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div>
+    </div>
+    <div class="kpi-card k2">
+      <div class="kpi-label">Tổng doanh thu</div>
+      <div class="kpi-value">3.42 tỷ</div>
+      <div class="kpi-trend"><span class="trend-up">▲ 14.3%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div>
+    </div>
+    <div class="kpi-card k3">
+      <div class="kpi-label">Tổng số đơn</div>
+      <div class="kpi-value">4,420</div>
+      <div class="kpi-trend"><span class="trend-up">▲ 11.7%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div>
+    </div>
+    <div class="kpi-card k4">
+      <div class="kpi-label">Tổng số Lead</div>
+      <div class="kpi-value">12,580</div>
+      <div class="kpi-trend"><span class="trend-up">▲ 8.4%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div>
+    </div>
+    <div class="kpi-card k5">
+      <div class="kpi-label">Tổng số KH</div>
+      <div class="kpi-value">2,389</div>
+      <div class="kpi-trend"><span class="trend-up">▲ 21.6%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div>
+    </div>
+    <div class="kpi-card k6">
+      <div class="kpi-label">DT trung bình / KH</div>
+      <div class="kpi-value">1.43M</div>
+      <div class="kpi-trend"><span class="trend-down">▼ 6.0%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div>
+    </div>
+    <div class="kpi-card" style="border-top:3px solid #0ab5a0;">
+      <div class="kpi-label">ROAS</div>
+      <div class="kpi-value" style="color:#0ab5a0;">8.6x</div>
+      <div class="kpi-trend"><span class="trend-up">▲ 1.2x</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div>
+    </div>
+  </div>
+
+  <!-- ROW 2: DT+KG/time | DT+KG/team | ROAS/time -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+    <div class="chart-card">
+      <div class="chart-header-row">
+        <div class="chart-head">
+          <div class="chart-title">Doanh thu & KG theo thời gian</div>
+          <div class="chart-sub">Năm nay vs năm ngoái</div>
+        </div>
+        <div class="chart-filters" style="align-items:center;">
+          <span style="font-size:11px;color:var(--text2);font-weight:600;">KG:</span>
+          <select id="filterKg" onchange="applyChart1Filters()" style="background:#fff;border:1px solid var(--border-card);color:var(--text);padding:4px 10px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;outline:none;">
+            <option value="both">Cả hai năm</option>
+            <option value="ty">Năm nay</option>
+            <option value="ly">Năm ngoái</option>
+          </select>
+          <span style="font-size:11px;color:var(--text2);font-weight:600;margin-left:6px;">DT:</span>
+          <select id="filterRev" onchange="applyChart1Filters()" style="background:#fff;border:1px solid var(--border-card);color:var(--text);padding:4px 10px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;outline:none;">
+            <option value="both">Cả hai năm</option>
+            <option value="ty">Năm nay</option>
+            <option value="ly">Năm ngoái</option>
+          </select>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#e91e8c;"></span>DT năm nay</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#fad0e8;border:1px solid #e91e8c;"></span>DT năm ngoái</span>
+        <span class="legend-item"><span class="legend-line" style="background:#42a5f5;"></span>KG năm nay</span>
+        <span class="legend-item"><span class="legend-dash" style="border-color:#42a5f5;"></span>KG năm ngoái</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chart1" role="img" aria-label="DT và KG theo tháng">DT & KG 12 tháng.</canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header-row">
+        <div class="chart-head">
+          <div class="chart-title">Doanh thu & KG theo Team</div>
+          <div class="chart-sub">Doanh thu (cột) vs số KG (đường)</div>
+        </div>
+        <div class="chart-filters" style="align-items:center;">
+          <span style="font-size:11px;color:var(--text2);font-weight:600;">KG:</span>
+          <select id="filterKgTeam" onchange="applyChart2Filters()" style="background:#fff;border:1px solid var(--border-card);color:var(--text);padding:4px 10px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;outline:none;">
+            <option value="both">Cả hai năm</option>
+            <option value="ty">Năm nay</option>
+            <option value="ly">Năm ngoái</option>
+          </select>
+          <span style="font-size:11px;color:var(--text2);font-weight:600;margin-left:6px;">DT:</span>
+          <select id="filterRevTeam" onchange="applyChart2Filters()" style="background:#fff;border:1px solid var(--border-card);color:var(--text);padding:4px 10px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;outline:none;">
+            <option value="both">Cả hai năm</option>
+            <option value="ty">Năm nay</option>
+            <option value="ly">Năm ngoái</option>
+          </select>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:rgba(233,30,140,0.6);"></span>DT năm nay</span>
+        <span class="legend-item"><span class="legend-dot" style="background:rgba(233,30,140,0.2);border:1px solid #e91e8c;"></span>DT năm ngoái</span>
+        <span class="legend-item"><span class="legend-line" style="background:#42a5f5;"></span>KG năm nay</span>
+        <span class="legend-item"><span class="legend-dash" style="border-color:#42a5f5;"></span>KG năm ngoái</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chart2" role="img" aria-label="DT và KG theo 5 team">Team 1-5.</canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">ROAS theo thời gian</div>
+        <div class="chart-sub">Năm nay vs năm ngoái</div>
+      </div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-line" style="background:#0ab5a0;"></span>ROAS năm nay</span>
+        <span class="legend-item"><span class="legend-dash" style="border-color:#0ab5a0;opacity:0.55;"></span>ROAS năm ngoái</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartROAS" role="img" aria-label="ROAS theo tháng">ROAS T1-T12.</canvas></div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Phễu chuyển đổi | Số KH phát sinh đơn -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Phễu chuyển đổi Lead</div>
+        <div class="chart-sub">Toàn công ty · 2024</div>
+      </div>
+      <div class="funnel-wrap" id="funnelWrap"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Số KH phát sinh đơn theo tháng</div>
+        <div class="chart-sub">KH theo tháng & lũy kế — năm nay</div>
+      </div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:rgba(233,30,140,0.6);"></span>KH theo tháng</span>
+        <span class="legend-item"><span class="legend-line" style="background:#6b3fa0;"></span>Lũy kế KH</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chart3" role="img" aria-label="KH phát sinh đơn theo tháng">KH T1-T12.</canvas></div>
+    </div>
+  </div>
+
+  <!-- ROW 4: Cohort full width -->
+  <div class="chart-card">
+    <div class="chart-header-row">
+      <div class="chart-head">
+        <div class="chart-title">Cohort — Khách hàng quay lại</div>
+        <div class="chart-sub">Tỉ lệ retention theo tháng bắt đầu</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;font-size:11px;color:var(--text3);">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#6b3fa0;border-radius:2px;display:inline-block;"></span>≥80%</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#c9a8e8;border-radius:2px;display:inline-block;"></span>40–60%</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#e5d4f5;border-radius:2px;display:inline-block;"></span>≤20%</span>
+      </div>
+    </div>
+    <div class="heatmap-container"><table class="heatmap-table" id="cohortTable"></table></div>
+  </div>
+
+</div>
+
+</div><!-- /page1 -->
+
+<div id="page2" style="display:none;">
+<!-- PAGE 2 SUBHEADER -->
+<div class="subheader" style="background:#0ab5a0;">
+  <div class="subheader-left">
+    <h2>HSKD — Hiệu Suất Kinh Doanh</h2>
+    <p>KG · Doanh thu · Công nợ · Phân tích nguồn</p>
+  </div>
+  <div class="subheader-pills">
+    <span class="sh-pill">72.6K kg</span>
+    <span class="sh-pill">3.42 tỷ DT</span>
+    <span class="sh-pill">2.98 tỷ DT thực</span>
+  </div>
+</div>
+<!-- PAGE 2 FILTERS -->
+<div class="filters">
+  <div class="filter-group"><span class="filter-label">Từ</span><input type="date" value="2024-01-01"><span class="filter-sep">–</span><input type="date" value="2024-12-31"></div>
+  <div class="filter-group"><span class="filter-label">Team</span><select><option>Tất cả team</option><option>Team 1</option><option>Team 2</option><option>Team 3</option><option>Team 4</option><option>Team 5</option></select></div>
+  <div class="filter-group"><span class="filter-label">Level KH</span><select><option>Tất cả</option><option>Titan</option><option>VIP 1</option><option>VIP 2</option><option>VIP 3</option></select></div>
+</div>
+
+<div class="main">
+  <!-- P2 ROW 1: KPI HSKD -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(7,1fr);">
+    <div class="kpi-card k1"><div class="kpi-label">Tổng KG</div><div class="kpi-value">72.6K</div><div class="kpi-trend"><span class="trend-up">▲ 18.2%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div></div>
+    <div class="kpi-card k3"><div class="kpi-label">Tổng số đơn</div><div class="kpi-value">4,420</div><div class="kpi-trend"><span class="trend-up">▲ 11.7%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div></div>
+    <div class="kpi-card k2"><div class="kpi-label">Tổng doanh thu</div><div class="kpi-value">3.42 tỷ</div><div class="kpi-trend"><span class="trend-up">▲ 14.3%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #0ab5a0;"><div class="kpi-label">DT thực</div><div class="kpi-value" style="color:#0ab5a0;">2.98 tỷ</div><div class="kpi-trend"><span class="trend-up">▲ 10.1%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #d4960a;"><div class="kpi-label">Khoản trừ</div><div class="kpi-value" style="color:#d4960a;">440M</div><div class="kpi-trend"><span class="trend-down">▲ 8.5%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #e53030;"><div class="kpi-label">Công nợ</div><div class="kpi-value" style="color:#e53030;">182M</div><div class="kpi-trend"><span class="trend-down">▼ 5.2%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #6b3fa0;"><div class="kpi-label">DT TB / Đơn</div><div class="kpi-value" style="color:#6b3fa0;">773K</div><div class="kpi-trend"><span class="trend-up">▲ 2.3%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div></div>
+  </div>
+
+  <!-- P2 ROW 2: KG chart | Heatmap | Decomp tree -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:12px;">
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Số KG theo tháng</div>
+        <div class="chart-sub">Năm nay vs năm ngoái</div>
+      </div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-line" style="background:#e91e8c;"></span>KG năm nay</span>
+        <span class="legend-item"><span class="legend-dash" style="border-color:#e91e8c;opacity:0.45;"></span>KG năm ngoái</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartKG2" role="img" aria-label="KG theo tháng trang 2">KG 12 tháng.</canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header-row">
+        <div class="chart-head">
+          <div class="chart-title">Doanh thu theo Team & Level KH</div>
+          <div class="chart-sub">Team (hàng) × Level KH (cột) · đơn vị: triệu</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;font-size:10px;color:var(--text3);">
+          <span style="display:flex;align-items:center;gap:3px;"><span style="width:9px;height:9px;background:#e91e8c;border-radius:1px;display:inline-block;"></span>Cao</span>
+          <span style="display:flex;align-items:center;gap:3px;"><span style="width:9px;height:9px;background:#f9a8d4;border-radius:1px;display:inline-block;"></span>TB</span>
+          <span style="display:flex;align-items:center;gap:3px;"><span style="width:9px;height:9px;background:#fef5fa;border-radius:1px;display:inline-block;"></span>Thấp</span>
+        </div>
+      </div>
+      <div class="heatmap-container"><table class="heatmap-table" style="table-layout:auto;" id="heatmap2"></table></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Doanh thu theo nguồn và kênh</div>
+        <div class="chart-sub">Ads vs Organic → FB · IG · Web · WhatsApp</div>
+      </div>
+      <div id="decompTree" style="overflow-x:auto;"></div>
+    </div>
+  </div>
+
+
+  <!-- P2 ROW 3: Matrix 3 tầng -->
+  <div class="chart-card" style="padding:0;overflow:hidden;">
+    <div style="padding:14px 16px 10px;border-bottom:1px solid var(--border-card);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div class="chart-title">Ma trận doanh thu — Team / Nhân viên / Đơn hàng</div>
+        <div class="chart-sub">Click ▶ để mở rộng · 3 cấp độ phân tích</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button onclick="matrixExpandAll()" style="background:var(--pink-pale);border:1px solid var(--border-card);color:var(--text2);padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-weight:600;">Mở tất cả</button>
+        <button onclick="matrixCollapseAll()" style="background:var(--pink-pale);border:1px solid var(--border-card);color:var(--text2);padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-weight:600;">Thu tất cả</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table id="matrixTable" style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead id="matrixHead"></thead>
+        <tbody id="matrixBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div><!-- /page2 -->
+
+<div id="page3" style="display:none;">
+<div class="subheader" style="background:#3b6fd4;">
+  <div class="subheader-left">
+    <h2>Phân Tích Khách Hàng</h2>
+    <p>KH mới · KH cũ · Retention · Cohort · Matrix đơn hàng</p>
+  </div>
+  <div class="subheader-pills">
+    <span class="sh-pill">2,389 tổng KH</span>
+    <span class="sh-pill">1,124 KH mới</span>
+    <span class="sh-pill">1,265 KH cũ</span>
+  </div>
+</div>
+<div class="filters">
+  <div class="filter-group"><span class="filter-label">Từ</span><input type="date" value="2024-01-01"><span class="filter-sep">–</span><input type="date" value="2024-12-31"></div>
+  <div class="filter-group"><span class="filter-label">Thương hiệu</span><select><option>Tất cả</option><option>Brand A</option><option>Brand B</option><option>Brand C</option></select></div>
+  <div class="filter-group"><span class="filter-label">Level</span><select><option>Tất cả</option><option>Titan</option><option>VIP 1</option><option>VIP 2</option><option>VIP 3</option></select></div>
+</div>
+
+<div class="main">
+  <!-- P3 R1: KPI -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);">
+    <div class="kpi-card" style="border-top:3px solid #3b6fd4;"><div class="kpi-label">Tổng KH</div><div class="kpi-value" style="color:#3b6fd4;">2,389</div><div class="kpi-trend"><span class="trend-up">▲ 21.6%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #e91e8c;"><div class="kpi-label">KH mới</div><div class="kpi-value" style="color:#e91e8c;">1,124</div><div class="kpi-trend"><span class="trend-up">▲ 34.2%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #0ab5a0;"><div class="kpi-label">KH cũ quay lại</div><div class="kpi-value" style="color:#0ab5a0;">1,265</div><div class="kpi-trend"><span class="trend-up">▲ 11.8%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #f472b6;"><div class="kpi-label">DT KH mới</div><div class="kpi-value" style="color:#f472b6;">1.24 tỷ</div><div class="kpi-trend"><span class="trend-up">▲ 28.5%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #6b3fa0;"><div class="kpi-label">DT KH cũ</div><div class="kpi-value" style="color:#6b3fa0;">2.18 tỷ</div><div class="kpi-trend"><span class="trend-up">▲ 7.4%</span><span class="kpi-sub">&nbsp;so kỳ trước</span></div></div>
+  </div>
+
+  <!-- P3 R2: Line KH+luỹ kế | Stacked 100% | Heatmap KH×level -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">KH phát sinh đơn theo tháng</div><div class="chart-sub">Số KH theo tháng & lũy kế</div></div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:rgba(59,111,212,0.6);"></span>KH/tháng</span>
+        <span class="legend-item"><span class="legend-line" style="background:#6b3fa0;"></span>Lũy kế</span>
+      </div>
+      <div class="chart-wrap"><canvas id="p3chart1" role="img" aria-label="KH phát sinh đơn theo tháng">KH T1-T12.</canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">Tỉ trọng KH mới & cũ theo tháng</div><div class="chart-sub">Stacked 100%</div></div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:rgba(233,30,140,0.75);"></span>KH mới</span>
+        <span class="legend-item"><span class="legend-dot" style="background:rgba(10,181,160,0.75);"></span>KH cũ</span>
+      </div>
+      <div class="chart-wrap"><canvas id="p3chart2" role="img" aria-label="Stacked 100% KH mới cũ">Tỉ trọng.</canvas></div>
+    </div>
+    <div class="chart-card" style="display:flex;flex-direction:column;">
+      <div class="chart-head"><div class="chart-title">Phân khúc KH theo RFM</div><div class="chart-sub">Tỉ trọng 5 phân khúc · năm nay</div></div>
+      <div style="display:flex;align-items:center;gap:16px;flex:1;">
+        <div style="position:relative;width:160px;height:160px;flex-shrink:0;">
+          <canvas id="p3rfmDonut" role="img" aria-label="Phân khúc KH RFM">RFM donut.</canvas>
+        </div>
+        <div id="p3rfmLegend" style="display:flex;flex-direction:column;gap:7px;font-size:11px;flex:1;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P3 R3: 2 Cohort charts -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="chart-card">
+      <div class="chart-header-row">
+        <div class="chart-head"><div class="chart-title">Cohort — Số KH quay lại</div><div class="chart-sub">Retention rate theo tháng bắt đầu</div></div>
+        <div style="display:flex;gap:6px;align-items:center;font-size:10px;color:var(--text3);">
+          <span style="display:flex;align-items:center;gap:3px;"><span style="width:9px;height:9px;background:#3b6fd4;border-radius:1px;display:inline-block;"></span>≥80%</span>
+          <span style="display:flex;align-items:center;gap:3px;"><span style="width:9px;height:9px;background:#bbcfee;border-radius:1px;display:inline-block;"></span>≤20%</span>
+        </div>
+      </div>
+      <div class="heatmap-container"><table class="heatmap-table" id="p3cohort1"></table></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header-row">
+        <div class="chart-head"><div class="chart-title">Cohort — Doanh thu KH quay lại</div><div class="chart-sub">Avg. revenue per retained customer (triệu)</div></div>
+        <div style="display:flex;gap:6px;align-items:center;font-size:10px;color:var(--text3);">
+          <span style="display:flex;align-items:center;gap:3px;"><span style="width:9px;height:9px;background:#0ab5a0;border-radius:1px;display:inline-block;"></span>Cao</span>
+          <span style="display:flex;align-items:center;gap:3px;"><span style="width:9px;height:9px;background:#c8f0eb;border-radius:1px;display:inline-block;"></span>Thấp</span>
+        </div>
+      </div>
+      <div class="heatmap-container"><table class="heatmap-table" id="p3cohort2"></table></div>
+    </div>
+  </div>
+
+  <!-- P3 R4: Matrix KH -->
+  <div class="chart-card" style="padding:0;overflow:hidden;">
+    <div style="padding:14px 16px 10px;border-bottom:1px solid var(--border-card);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div><div class="chart-title">Bảng chi tiết KH — Team / Tên KH / Mã đơn</div><div class="chart-sub">Click ▶ để mở rộng · 3 cấp</div></div>
+      <div style="display:flex;gap:6px;">
+        <button onclick="p3ExpandAll()" style="background:var(--pink-pale);border:1px solid var(--border-card);color:var(--text2);padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-weight:600;">Mở tất cả</button>
+        <button onclick="p3CollapseAll()" style="background:var(--pink-pale);border:1px solid var(--border-card);color:var(--text2);padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-weight:600;">Thu tất cả</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table id="p3Matrix" style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead id="p3MatrixHead"></thead>
+        <tbody id="p3MatrixBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div><!-- /page3 -->
+<div id="page4" style="display:none;">
+<div class="subheader" style="background:#d4960a;">
+  <div class="subheader-left">
+    <h2>Marketing Performance</h2>
+    <p>Chi phí · Lead · Chuyển đổi · ROAS · Hiệu suất team</p>
+  </div>
+  <div class="subheader-pills">
+    <span class="sh-pill">580M chi phí</span>
+    <span class="sh-pill">12,580 leads</span>
+    <span class="sh-pill">8.6x ROAS</span>
+  </div>
+</div>
+<!-- MKT SUB-TABS -->
+<div style="background:#fff;border-bottom:2px solid #f0e0d0;padding:0 20px;display:flex;gap:0;">
+  <button id="mktSubTab1" onclick="showMktSub(1)" style="padding:10px 20px;border:none;border-bottom:3px solid #d4960a;background:transparent;color:#d4960a;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:-2px;">Tổng quan MKT</button>
+  <button id="mktSubTab2" onclick="showMktSub(2)" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:transparent;color:#9a9aaa;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:-2px;">Chi tiết hiệu quả MKT theo Team</button>
+</div>
+<div class="filters">
+  <div class="filter-group"><span class="filter-label">Từ</span><input type="date" value="2024-01-01"><span class="filter-sep">–</span><input type="date" value="2024-12-31"></div>
+  <div class="filter-group"><span class="filter-label">Kênh</span><select><option>Tất cả kênh</option><option>Facebook</option><option>Instagram</option><option>Web</option><option>WhatsApp</option></select></div>
+  <div class="filter-group"><span class="filter-label">Nguồn</span><select><option>Tất cả</option><option>Ads</option><option>Organic</option></select></div>
+</div>
+
+<div id="mktSub1"><div class="main">
+  <!-- MKT R1: KPI -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(8,1fr);">
+    <div class="kpi-card" style="border-top:3px solid #d4960a;"><div class="kpi-label">Chi phí MKT</div><div class="kpi-value" style="font-size:20px;color:#d4960a;">580M</div><div class="kpi-trend"><span class="trend-down">▲ 12%</span><span class="kpi-sub">&nbsp;vs kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #e91e8c;"><div class="kpi-label">Số Lead</div><div class="kpi-value" style="font-size:20px;color:#e91e8c;">12,580</div><div class="kpi-trend"><span class="trend-up">▲ 8.4%</span><span class="kpi-sub">&nbsp;vs kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #3b6fd4;"><div class="kpi-label">Số đơn</div><div class="kpi-value" style="font-size:20px;color:#3b6fd4;">4,420</div><div class="kpi-trend"><span class="trend-up">▲ 11.7%</span><span class="kpi-sub">&nbsp;vs kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #0ab5a0;"><div class="kpi-label">Đơn / Lead</div><div class="kpi-value" style="font-size:20px;color:#0ab5a0;">19.2%</div><div class="kpi-trend"><span class="trend-up">▲ 0.8%</span><span class="kpi-sub">&nbsp;vs kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #6b3fa0;"><div class="kpi-label">Doanh thu</div><div class="kpi-value" style="font-size:20px;color:#6b3fa0;">3.42T</div><div class="kpi-trend"><span class="trend-up">▲ 14.3%</span><span class="kpi-sub">&nbsp;vs kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #e53030;"><div class="kpi-label">CP / Lead</div><div class="kpi-value" style="font-size:20px;color:#e53030;">46K</div><div class="kpi-trend"><span class="trend-up">▲ 3.2%</span><span class="kpi-sub">&nbsp;vs kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #f472b6;"><div class="kpi-label">CP / Đơn</div><div class="kpi-value" style="font-size:20px;color:#f472b6;">131K</div><div class="kpi-trend"><span class="trend-up">▲ 1.8%</span><span class="kpi-sub">&nbsp;vs kỳ trước</span></div></div>
+    <div class="kpi-card" style="border-top:3px solid #d4960a;"><div class="kpi-label">ROAS</div><div class="kpi-value" style="font-size:20px;color:#d4960a;">8.6x</div><div class="kpi-trend"><span class="trend-up">▲ 1.2x</span><span class="kpi-sub">&nbsp;vs kỳ trước</span></div></div>
+  </div>
+
+  <!-- MKT R2: Lead Q/DQ chart | Funnel | Decomp lead nguồn/kênh -->
+  <div style="display:grid;grid-template-columns:1fr 0.75fr 1.1fr;gap:12px;">
+
+    <!-- Chart 1: Lead card → arrow → Q & DQ cards -->
+    <div style="display:flex;flex-direction:column;gap:0;">
+      <!-- Top: Số Lead card -->
+      <div class="chart-card" style="border-radius:8px 8px 0 0;border-bottom:none;padding:14px 16px 12px;">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin-bottom:4px;">Số Lead</div>
+        <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;">
+          <div style="font-size:28px;font-weight:800;color:#e91e8c;letter-spacing:-1px;">12,580</div>
+          <span style="font-size:11px;color:var(--green);font-weight:600;margin-bottom:4px;">▲ 8.4% vs kỳ trước</span>
+        </div>
+        <div id="mktLeadQDQ" style="width:100%;height:80px;margin-top:8px;overflow:hidden;"></div>
+      </div>
+
+      <!-- Arrow -->
+      <div style="display:flex;justify-content:center;align-items:center;height:28px;background:#fff;border-left:1px solid var(--border-card);border-right:1px solid var(--border-card);">
+        <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="1" x2="10" y2="13" stroke="#c48aaa" stroke-width="2" stroke-linecap="round"/>
+          <polygon points="4,11 16,11 10,19" fill="#c48aaa"/>
+        </svg>
+      </div>
+
+      <!-- Bottom: Q & DQ side by side -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+        <div class="chart-card" style="border-radius:0 0 0 8px;border-top:none;border-right:none;padding:12px 14px;">
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:5px;">
+            <span style="width:8px;height:8px;background:rgba(59,111,212,0.85);border-radius:2px;display:inline-block;"></span>Qualified
+          </div>
+          <div style="font-size:24px;font-weight:800;color:#3b6fd4;letter-spacing:-0.5px;">7,926</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">63% tổng lead</div>
+          <div id="mktQualChart" style="width:100%;height:60px;margin-top:6px;overflow:hidden;"></div>
+        </div>
+        <div class="chart-card" style="border-radius:0 0 8px 0;border-top:none;border-left:1px solid var(--border-card);padding:12px 14px;">
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:5px;">
+            <span style="width:8px;height:8px;background:rgba(220,80,80,0.82);border-radius:2px;display:inline-block;"></span>Disqualified
+          </div>
+          <div style="font-size:24px;font-weight:800;color:#dc5050;letter-spacing:-0.5px;">4,654</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">37% tổng lead</div>
+          <div id="mktDisqChart" style="width:100%;height:60px;margin-top:6px;overflow:hidden;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 2: Phễu -->
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">Phễu chuyển đổi Lead</div><div class="chart-sub">Toàn công ty · 2024</div></div>
+      <div id="mktFunnel"></div>
+    </div>
+
+    <!-- Chart 3: Decomposition Lead nguồn → kênh -->
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Lead theo nguồn và kênh</div>
+        <div class="chart-sub">Ads / Organic → FB · IG · WhatsApp · Web · TikTok</div>
+      </div>
+      <div id="mktLeadDecomp" style="overflow:auto;height:260px;"></div>
+    </div>
+  </div>
+
+  <!-- MKT R3: Chỉ số hiệu quả | Bảng hiệu suất -->
+  <div style="display:grid;grid-template-columns:1fr 1.7fr;gap:12px;">
+    <div class="chart-card">
+      <div class="chart-header-row">
+        <div class="chart-head"><div class="chart-title">Chỉ số hiệu quả MKT theo thời gian</div><div class="chart-sub">Chọn chỉ số để xem</div></div>
+        <select id="mktMetricSel" onchange="buildMktLine()" style="background:#fff;border:1px solid var(--border-card);color:var(--text);padding:4px 10px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;outline:none;">
+          <option value="cpOrder">CP / Đơn (K)</option>
+          <option value="cpLead">CP / Lead (K)</option>
+          <option value="roas">ROAS</option>
+          <option value="cvr">Tỉ lệ chuyển đổi (%)</option>
+        </select>
+      </div>
+      <div class="chart-wrap"><canvas id="mktLineChart" role="img" aria-label="Chỉ số hiệu quả MKT">MKT KPI.</canvas></div>
+    </div>
+
+    <div class="chart-card" style="padding:0;overflow:hidden;">
+      <div style="padding:12px 16px 10px;border-bottom:1px solid var(--border-card);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div><div class="chart-title">Hiệu suất MKT — Team / Nhân viên</div><div class="chart-sub">Click ▶ để mở rộng</div></div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="mktExpandAll()" style="background:var(--pink-pale);border:1px solid var(--border-card);color:var(--text2);padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-weight:600;">Mở tất cả</button>
+          <button onclick="mktCollapseAll()" style="background:var(--pink-pale);border:1px solid var(--border-card);color:var(--text2);padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-weight:600;">Thu tất cả</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="mktMatrix" style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead id="mktMatrixHead"></thead>
+          <tbody id="mktMatrixBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div></div><!-- /mktSub1 -->
+
+<!-- MKT SUB-PAGE 2: Chi tiết theo team -->
+<div id="mktSub2" style="display:none;">
+<div class="main">
+
+  <!-- TEAM KPI GRID -->
+  <div>
+    <div class="section-title" style="color:#d4960a;">Hiệu quả MKT theo Team</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;" id="teamKpiGrid"></div>
+  </div>
+
+  <!-- TEAM CHARTS ROW 1 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">Số Lead theo Team</div><div class="chart-sub">Tổng lead vs Qualified · bar ngang</div></div>
+
+      <div style="position:relative;width:100%;height:200px;"><canvas id="teamLeadChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">Tỉ lệ chuyển đổi theo Team</div><div class="chart-sub">% Lead → Đơn · xanh ≥20% · vàng &lt;20%</div></div>
+      <div style="position:relative;width:100%;height:200px;"><canvas id="teamCVRChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TEAM CHARTS ROW 2 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">Thời gian phản hồi Lead</div><div class="chart-sub">Nhận lead → phản hồi (giờ) · xanh ≤2h</div></div>
+      <div style="position:relative;width:100%;height:200px;"><canvas id="teamRespChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">Thời gian ra đơn</div><div class="chart-sub">Nhận lead → phát sinh đơn (ngày)</div></div>
+      <div style="position:relative;width:100%;height:200px;"><canvas id="teamOrderTimeChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">ROAS theo Team</div><div class="chart-sub">Doanh thu / Chi phí MKT (x)</div></div>
+      <div style="position:relative;width:100%;height:200px;"><canvas id="teamROASChart"></canvas></div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /mktSub2 -->
+
+</div><!-- /page4 -->
+<div id="page5" style="display:none;">
+<div class="subheader" style="background:linear-gradient(135deg,#6b3fa0,#3b6fd4);">
+  <div class="subheader-left">
+    <h2>Phương Pháp Luận Phân Khúc Khách Hàng</h2>
+    <p>RFM Model · Recency · Frequency · Monetary · 5 phân khúc chiến lược</p>
+  </div>
+  <div class="subheader-pills">
+    <span class="sh-pill">RFM Scoring</span>
+    <span class="sh-pill">5 Segments</span>
+    <span class="sh-pill">Action Matrix</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ROW 1: RFM Introduction -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <!-- What is RFM -->
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">RFM là gì?</div><div class="chart-sub">Ba chiều phân tích hành vi khách hàng</div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:#fdf0f9;border-radius:8px;border-left:4px solid #e91e8c;">
+          <div style="width:36px;height:36px;background:#e91e8c;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <span style="color:#fff;font-size:16px;font-weight:900;">R</span>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:13px;color:#1a1a2e;">Recency — Gần đây nhất</div>
+            <div style="font-size:12px;color:#7a4060;margin-top:2px;">Khách hàng mua hàng cách đây bao lâu? Càng gần đây → R cao → có xu hướng mua lại cao hơn.</div>
+            <div style="margin-top:6px;display:flex;gap:6px;">
+              <span style="background:#fce4f1;color:#e91e8c;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">≤30 ngày: R=5</span>
+              <span style="background:#fce4f1;color:#e91e8c;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">31–90 ngày: R=3</span>
+              <span style="background:#fce4f1;color:#e91e8c;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">>180 ngày: R=1</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:#f0f8ff;border-radius:8px;border-left:4px solid #3b6fd4;">
+          <div style="width:36px;height:36px;background:#3b6fd4;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <span style="color:#fff;font-size:16px;font-weight:900;">F</span>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:13px;color:#1a1a2e;">Frequency — Tần suất</div>
+            <div style="font-size:12px;color:#2a4070;margin-top:2px;">Khách hàng mua bao nhiêu lần? Tần suất cao → F cao → khách hàng gắn bó, ít bị thay thế bởi đối thủ.</div>
+            <div style="margin-top:6px;display:flex;gap:6px;">
+              <span style="background:#dce8ff;color:#3b6fd4;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">≥10 đơn: F=5</span>
+              <span style="background:#dce8ff;color:#3b6fd4;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">4–9 đơn: F=3</span>
+              <span style="background:#dce8ff;color:#3b6fd4;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">1 đơn: F=1</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:#f0fdf9;border-radius:8px;border-left:4px solid #0ab5a0;">
+          <div style="width:36px;height:36px;background:#0ab5a0;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <span style="color:#fff;font-size:16px;font-weight:900;">M</span>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:13px;color:#1a1a2e;">Monetary — Giá trị tiền tệ</div>
+            <div style="font-size:12px;color:#0a5a50;margin-top:2px;">Khách hàng chi bao nhiêu tổng cộng? M cao → khách hàng giá trị lớn → ưu tiên chăm sóc đặc biệt.</div>
+            <div style="margin-top:6px;display:flex;gap:6px;">
+              <span style="background:#c8f0eb;color:#0ab5a0;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">≥10M: M=5</span>
+              <span style="background:#c8f0eb;color:#0ab5a0;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">3–10M: M=3</span>
+              <span style="background:#c8f0eb;color:#0ab5a0;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;"><1M: M=1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scoring & Calculation -->
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">Cách tính điểm RFM</div><div class="chart-sub">Quy trình 4 bước từ dữ liệu → phân khúc</div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+        <!-- Step 1 -->
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:26px;height:26px;background:#6b3fa0;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:800;color:#fff;">1</div>
+          <div style="flex:1;background:#faf5ff;border-radius:6px;padding:10px 12px;">
+            <div style="font-weight:700;font-size:12px;color:#1a1a2e;">Thu thập dữ liệu lịch sử đơn hàng</div>
+            <div style="font-size:11px;color:#5a3a8a;margin-top:2px;">Với mỗi KH: ngày mua gần nhất, tổng số đơn, tổng doanh thu trong kỳ phân tích (thường 12 tháng)</div>
+          </div>
+        </div>
+        <!-- Step 2 -->
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:26px;height:26px;background:#6b3fa0;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:800;color:#fff;">2</div>
+          <div style="flex:1;background:#faf5ff;border-radius:6px;padding:10px 12px;">
+            <div style="font-weight:700;font-size:12px;color:#1a1a2e;">Phân vị hóa (Quintile Scoring 1–5)</div>
+            <div style="font-size:11px;color:#5a3a8a;margin-top:2px;">Chia toàn bộ KH thành 5 nhóm bằng nhau theo từng chiều R, F, M. Nhóm tốt nhất = 5, xấu nhất = 1.</div>
+            <div style="margin-top:6px;font-size:10px;background:#e8d8f8;border-radius:4px;padding:5px 8px;font-family:monospace;color:#4a1a8a;">RFM_Score = R_score × 100 + F_score × 10 + M_score</div>
+          </div>
+        </div>
+        <!-- Step 3 -->
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:26px;height:26px;background:#6b3fa0;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:800;color:#fff;">3</div>
+          <div style="flex:1;background:#faf5ff;border-radius:6px;padding:10px 12px;">
+            <div style="font-weight:700;font-size:12px;color:#1a1a2e;">Gán nhãn phân khúc theo điểm tổng hợp</div>
+            <div style="font-size:11px;color:#5a3a8a;margin-top:2px;">Dùng bảng quy tắc kết hợp R+F+M để gán 1 trong 5 nhãn phân khúc chiến lược cho từng KH.</div>
+          </div>
+        </div>
+        <!-- Step 4 -->
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:26px;height:26px;background:#6b3fa0;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:800;color:#fff;">4</div>
+          <div style="flex:1;background:#faf5ff;border-radius:6px;padding:10px 12px;">
+            <div style="font-weight:700;font-size:12px;color:#1a1a2e;">Định kỳ cập nhật & đánh giá dịch chuyển</div>
+            <div style="font-size:11px;color:#5a3a8a;margin-top:2px;">Chạy lại hàng tháng. Theo dõi KH dịch chuyển giữa phân khúc để đo hiệu quả chăm sóc.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BƯỚC 1: Định nghĩa 3 chỉ số -->
+  <div>
+    <div class="section-title" style="color:#6b3fa0;">Bước 1 — Định nghĩa 3 chỉ số</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+
+      <!-- R -->
+      <div style="background:#fff;border:1px solid #e0d0f0;border-radius:10px;padding:18px;border-top:4px solid #6b3fa0;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="width:40px;height:40px;background:#6b3fa0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0;">R</div>
+          <div>
+            <div style="font-weight:800;font-size:14px;color:#3a1a6a;">Recency — Gần đây nhất</div>
+            <div style="font-size:11px;color:#8a6aaa;margin-top:2px;">Khoảng thời gian từ lần mua gần nhất đến hiện tại</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#3a1a6a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">5</div>
+            <div style="font-size:11px;flex:0 0 110px;">1 – 30 ngày</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:100%;height:100%;background:#3a1a6a;border-radius:3px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#5a3a9a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">4</div>
+            <div style="font-size:11px;flex:0 0 110px;">31 – 60 ngày</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:78%;height:100%;background:#5a3a9a;border-radius:3px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#7a5aba;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">3</div>
+            <div style="font-size:11px;flex:0 0 110px;">61 – 90 ngày</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:56%;height:100%;background:#7a5aba;border-radius:3px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#aa88dd;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">2</div>
+            <div style="font-size:11px;flex:0 0 110px;">91 – 180 ngày</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:34%;height:100%;background:#aa88dd;border-radius:3px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#ccaaf0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">1</div>
+            <div style="font-size:11px;flex:0 0 110px;">Trên 180 ngày</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:16%;height:100%;background:#ccaaf0;border-radius:3px;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- F -->
+      <div style="background:#fff;border:1px solid #c0e8e0;border-radius:10px;padding:18px;border-top:4px solid #0ab5a0;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="width:40px;height:40px;background:#0ab5a0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0;">F</div>
+          <div>
+            <div style="font-weight:800;font-size:14px;color:#065a50;">Frequency — Tần suất</div>
+            <div style="font-size:11px;color:#2a9a8a;margin-top:2px;">Số hóa đơn / Khoảng thời gian từ lần mua đầu (tháng)</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#065a50;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">5</div>
+            <div style="font-size:11px;flex:0 0 110px;">Trên 5 lần</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:100%;height:100%;background:#065a50;border-radius:3px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#0a8a78;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">4</div>
+            <div style="font-size:11px;flex:0 0 110px;">3 – 5 lần</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:78%;height:100%;background:#0a8a78;border-radius:3px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#0ab5a0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">3</div>
+            <div style="font-size:11px;flex:0 0 110px;">2 – 3 lần</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:56%;height:100%;background:#0ab5a0;border-radius:3px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#55ccbc;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">2</div>
+            <div style="font-size:11px;flex:0 0 110px;">1 – 2 lần</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:34%;height:100%;background:#55ccbc;border-radius:3px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#aae8e0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">1</div>
+            <div style="font-size:11px;flex:0 0 110px;">Dưới 1 lần</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:16%;height:100%;background:#aae8e0;border-radius:3px;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- M -->
+      <div style="background:#fff;border:1px solid #f0d8b0;border-radius:10px;padding:18px;border-top:4px solid #c87800;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="width:40px;height:40px;background:#c87800;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0;">M</div>
+          <div>
+            <div style="font-weight:800;font-size:14px;color:#6a3a00;">Monetary — Giá trị trung bình / đơn</div>
+            <div style="font-size:11px;color:#aa6a00;margin-top:2px;">Giá trị mua trung bình một hóa đơn (USD)</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#6a3a00;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">5</div>
+            <div style="font-size:11px;flex:0 0 110px;">Trên $500</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:100%;height:100%;background:#6a3a00;border-radius:3px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#a06000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">4</div>
+            <div style="font-size:11px;flex:0 0 110px;">$250 – $500</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:78%;height:100%;background:#a06000;border-radius:3px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#c87800;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">3</div>
+            <div style="font-size:11px;flex:0 0 110px;">$100 – $250</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:56%;height:100%;background:#c87800;border-radius:3px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#e8a840;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">2</div>
+            <div style="font-size:11px;flex:0 0 110px;">$50 – $100</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:34%;height:100%;background:#e8a840;border-radius:3px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:22px;height:22px;background:#f5cc88;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">1</div>
+            <div style="font-size:11px;flex:0 0 110px;">Dưới $50</div>
+            <div style="flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden;"><div style="width:16%;height:100%;background:#f5cc88;border-radius:3px;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Note -->
+    <div style="background:#fdf8ff;border:1px solid #d8c8f0;border-radius:8px;padding:12px 16px;margin-top:12px;font-size:12px;color:#4a2a8a;line-height:1.6;">
+      <strong>📌 Ghi chú:</strong> Mỗi khách hàng được gán bộ 3 điểm <strong>R – F – M</strong> (mỗi chiều từ 1 đến 5).
+      Ví dụ: khách mua <em>10 ngày trước, 4 lần/tháng, đơn $320</em> → điểm <strong>5 – 4 – 4</strong>
+    </div>
+  </div>
+
+  <!-- BƯỚC 2: 5 Phân khúc + ghi chú -->
+  <div>
+    <div class="section-title" style="color:#6b3fa0;">Bước 2 — 5 Phân Khúc Chiến Lược</div>
+    <!-- 5 cards -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;">
+      <!-- Trung Thành -->
+      <div style="background:#fff;border:1px solid #c8d8f8;border-top:4px solid #3b6fd4;border-radius:8px;padding:14px;">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+          <span style="font-size:18px;">🏆</span>
+          <div style="font-weight:800;font-size:13px;color:#3b6fd4;">Trung Thành</div>
+        </div>
+        <div style="font-size:10px;background:#e8f0ff;color:#1a3a8a;border-radius:4px;padding:3px 7px;display:inline-block;font-weight:600;margin-bottom:8px;">R≥4 · F≥4 · M≥4</div>
+        <div style="font-size:11px;color:#2a3a6a;line-height:1.6;border:1.5px solid #3b6fd4;border-radius:6px;padding:7px 9px;background:#f5f8ff;">Mua thường xuyên, gần đây và giá trị cao. Nhóm cốt lõi tạo <strong>40–50% doanh thu</strong>.</div>
+        <div style="margin-top:8px;background:#f0f5ff;border-radius:6px;padding:8px 10px;">
+          <div style="font-size:10px;font-weight:700;color:#3b6fd4;margin-bottom:3px;">🎯 CHIẾN LƯỢC</div>
+          <div style="font-size:10px;color:#3a4a7a;line-height:1.6;">• Loyalty VIP · Early access<br>• Gifting & personalization<br>• Upsell tier cao hơn</div>
+        </div>
+      </div>
+      <!-- Tiềm Năng -->
+      <div style="background:#fff;border:1px solid #b8ede8;border-top:4px solid #0ab5a0;border-radius:8px;padding:14px;">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+          <span style="font-size:18px;">🌱</span>
+          <div style="font-weight:800;font-size:13px;color:#0ab5a0;">Tiềm Năng</div>
+        </div>
+        <div style="font-size:10px;background:#d8f5f2;color:#065a50;border-radius:4px;padding:3px 7px;display:inline-block;font-weight:600;margin-bottom:8px;">R≥4 · F≥2 · M≥3</div>
+        <div style="font-size:11px;color:#0a4a42;line-height:1.6;border:1.5px solid #0ab5a0;border-radius:6px;padding:7px 9px;background:#f0fdf9;">Mua gần đây, tần suất đang tăng. Có khả năng <strong>trở thành KH trung thành</strong> nếu được nurture đúng.</div>
+        <div style="margin-top:8px;background:#e8faf8;border-radius:6px;padding:8px 10px;">
+          <div style="font-size:10px;font-weight:700;color:#0ab5a0;margin-bottom:3px;">🎯 CHIẾN LƯỢC</div>
+          <div style="font-size:10px;color:#0a4a42;line-height:1.6;">• Nurture sequence<br>• Discount lần mua kế tiếp<br>• Cross-sell định kỳ</div>
+        </div>
+      </div>
+      <!-- Mới -->
+      <div style="background:#fff;border:1px solid #fcd0e8;border-top:4px solid #e91e8c;border-radius:8px;padding:14px;">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+          <span style="font-size:18px;">✨</span>
+          <div style="font-weight:800;font-size:13px;color:#e91e8c;">Mới</div>
+        </div>
+        <div style="font-size:10px;background:#fce4f1;color:#8a1060;border-radius:4px;padding:3px 7px;display:inline-block;font-weight:600;margin-bottom:8px;">R≥4 · F=1 · M bất kỳ</div>
+        <div style="font-size:11px;color:#7a1050;line-height:1.6;border:1.5px solid #e91e8c;border-radius:6px;padding:7px 9px;background:#fff5fb;">Mua lần đầu gần đây. Giai đoạn quyết định: trải nghiệm tốt → giữ chân, ngược lại → <strong>churn ngay</strong>.</div>
+        <div style="margin-top:8px;background:#fef0f7;border-radius:6px;padding:8px 10px;">
+          <div style="font-size:10px;font-weight:700;color:#e91e8c;margin-bottom:3px;">🎯 CHIẾN LƯỢC</div>
+          <div style="font-size:10px;color:#7a1050;line-height:1.6;">• Welcome series<br>• Khuyến mãi lần mua thứ 2<br>• Survey trải nghiệm</div>
+        </div>
+      </div>
+      <!-- Nguy Cơ -->
+      <div style="background:#fff;border:1px solid #f5e0a8;border-top:4px solid #d4960a;border-radius:8px;padding:14px;">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+          <span style="font-size:18px;">⚠️</span>
+          <div style="font-weight:800;font-size:13px;color:#d4960a;">Nguy Cơ</div>
+        </div>
+        <div style="font-size:10px;background:#fef0cc;color:#7a4800;border-radius:4px;padding:3px 7px;display:inline-block;font-weight:600;margin-bottom:8px;">R=2 · F≥3 · M≥3</div>
+        <div style="font-size:11px;color:#6a4000;line-height:1.6;border:1.5px solid #d4960a;border-radius:6px;padding:7px 9px;background:#fffaf0;">Từng mua thường xuyên, giá trị tốt nhưng <strong>đang thưa dần</strong>. Cần win-back trước khi mất hẳn sang đối thủ.</div>
+        <div style="margin-top:8px;background:#fff8e8;border-radius:6px;padding:8px 10px;">
+          <div style="font-size:10px;font-weight:700;color:#d4960a;margin-bottom:3px;">🎯 CHIẾN LƯỢC</div>
+          <div style="font-size:10px;color:#6a4000;line-height:1.6;">• Win-back campaign<br>• Ưu đãi thời hạn giới hạn<br>• Gọi điện từ NV sale</div>
+        </div>
+      </div>
+      <!-- Churn -->
+      <div style="background:#fff;border:1px solid #f8c8c8;border-top:4px solid #e53030;border-radius:8px;padding:14px;">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+          <span style="font-size:18px;">🚨</span>
+          <div style="font-weight:800;font-size:13px;color:#e53030;">Churn</div>
+        </div>
+        <div style="font-size:10px;background:#fde8e8;color:#8a0808;border-radius:4px;padding:3px 7px;display:inline-block;font-weight:600;margin-bottom:8px;">R=1 · F bất kỳ · M bất kỳ</div>
+        <div style="font-size:11px;color:#6a1010;line-height:1.6;border:1.5px solid #e53030;border-radius:6px;padding:7px 9px;background:#fff5f5;">Trên 180 ngày không quay lại. Dù F và M từng cao vẫn coi là đã rời bỏ — chiến lược <strong>last-chance hoặc ngừng đầu tư</strong>.</div>
+        <div style="margin-top:8px;background:#fff0f0;border-radius:6px;padding:8px 10px;">
+          <div style="font-size:10px;font-weight:700;color:#e53030;margin-bottom:3px;">🎯 CHIẾN LƯỢC</div>
+          <div style="font-size:10px;color:#6a1010;line-height:1.6;">• Re-activation last-chance<br>• Khảo sát lý do rời đi<br>• Ngừng đầu tư nếu không PH</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BƯỚC 3: Nhóm điểm RFM chi tiết -->
+  <div>
+    <div class="section-title" style="color:#6b3fa0;">Bước 3 — Nhóm điểm RFM chi tiết theo phân khúc</div>
+    <div class="chart-card" style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:11.5px;">
+        <thead>
+          <tr style="background:#f5f0ff;border-bottom:2px solid #d0b8f0;">
+            <th style="padding:10px 12px;text-align:left;font-weight:700;color:#4a1a8a;white-space:nowrap;min-width:120px;">Phân khúc</th>
+            <th style="padding:10px 12px;text-align:left;font-weight:700;color:#4a1a8a;white-space:nowrap;min-width:120px;">Quy tắc R – F – M</th>
+            <th style="padding:10px 12px;text-align:left;font-weight:700;color:#4a1a8a;min-width:280px;">Nhóm điểm RFM</th>
+            <th style="padding:10px 12px;text-align:left;font-weight:700;color:#4a1a8a;min-width:220px;">Đặc điểm</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #eee;background:#f0f5ff;">
+            <td style="padding:10px 12px;font-weight:700;color:#3b6fd4;white-space:nowrap;">🏆 Khách hàng mới</td>
+            <td style="padding:10px 12px;font-size:11px;color:#2a3a6a;line-height:1.8;">R ≥ 4<br>F ≤ 2<br>M bất kỳ</td>
+            <td style="padding:10px 12px;font-size:10px;color:#444;font-family:monospace;line-height:1.9;">511, 512, 521, 522, 411, 412, 421, 422, 513, 523, 413, 423, 514, 524, 414, 424, 515, 525, 415, 425</td>
+            <td style="padding:10px 12px;font-size:11px;color:#2a3a6a;line-height:1.6;">Mới lần đầu hoặc thứ hai gần đây. Chưa hình thành thói quen — cần onboarding và kích mua lần tiếp theo</td>
+          </tr>
+          <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:10px 12px;font-weight:700;color:#0ab5a0;white-space:nowrap;">🌱 Tiềm năng</td>
+            <td style="padding:10px 12px;font-size:11px;color:#0a4a42;line-height:1.8;">R ≥ 3<br>F 2–3<br>M ≥ 2</td>
+            <td style="padding:10px 12px;font-size:10px;color:#444;font-family:monospace;line-height:1.9;">323, 324, 325, 333, 334, 335, 343, 344, 345, 353, 354, 355, 423, 424, 425, 433, 434, 435, 443, 444, 445, 523, 524, 525, 533, 534, 535, 543, 544, 545</td>
+            <td style="padding:10px 12px;font-size:11px;color:#0a4a42;line-height:1.6;">Mua gần đây, tần suất đang tăng, giá trị đơn ở mức trung bình. Có thể trở thành trung thành nếu được nurture đúng</td>
+          </tr>
+          <tr style="border-bottom:1px solid #eee;background:#eff4ff;">
+            <td style="padding:10px 12px;font-weight:700;color:#3b6fd4;white-space:nowrap;">🏆 Trung thành</td>
+            <td style="padding:10px 12px;font-size:11px;color:#1a3a8a;line-height:1.8;">R ≥ 3<br>F ≥ 4<br>M ≥ 3</td>
+            <td style="padding:10px 12px;font-size:10px;color:#444;font-family:monospace;line-height:1.9;">343, 344, 345, 353, 354, 355, 443, 444, 453, 454, 455, 543, 544, 545, 553, 554, 555</td>
+            <td style="padding:10px 12px;font-size:11px;color:#1a3a8a;line-height:1.6;">Mua đều đặn, giá trị cao — thường là salon, studio hoặc nhà phân phối tóc giá chuyên nghiệp. Ưu tiên giữ chân hàng đầu</td>
+          </tr>
+          <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:10px 12px;font-weight:700;color:#d4960a;white-space:nowrap;">⚠️ Nguy cơ</td>
+            <td style="padding:10px 12px;font-size:11px;color:#7a4800;line-height:1.8;">R = 2<br>F ≥ 3<br>M ≥ 3</td>
+            <td style="padding:10px 12px;font-size:10px;color:#444;font-family:monospace;line-height:1.9;">233, 234, 235, 243, 244, 245, 253, 254, 255, 223, 224, 225, 232, 242, 252, 213, 214, 215</td>
+            <td style="padding:10px 12px;font-size:11px;color:#7a4800;line-height:1.6;">Từng mua thường xuyên, giá trị tốt nhưng đang thưa dần. Cần win-back trước khi mất hẳn sang đối thủ</td>
+          </tr>
+          <tr style="background:#fff5f5;">
+            <td style="padding:10px 12px;font-weight:700;color:#e53030;white-space:nowrap;">🚨 Churn</td>
+            <td style="padding:10px 12px;font-size:11px;color:#6a1010;line-height:1.8;">R = 1<br>F bất kỳ<br>M bất kỳ</td>
+            <td style="padding:10px 12px;font-size:10px;color:#444;font-family:monospace;line-height:1.9;">111, 112, 113, 114, 115, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 141, 142, 143, 144, 145, 151, 152, 153, 154, 155</td>
+            <td style="padding:10px 12px;font-size:11px;color:#6a1010;line-height:1.6;">Trên 180 ngày không quay lại. Dù F và M từng cao vẫn coi là đã rời bỏ — chiến lược last-chance hoặc ngừng đầu tư</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div><!-- /page5 -->
+
+
+
+<script>
+const months=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+/* INSIGHT NOTES (dùng để đọc từ chart):
+   - DT năm nay tăng mạnh từ T4→T6 (campaign Hè), đỉnh T6, sụt T7–T8 rồi phục hồi T9–T10
+   - KG năm nay vượt năm ngoái đều, chênh lớn nhất T6 (+22%)
+   - DT năm ngoái tăng đều nhưng không có đỉnh rõ → năm nay có chiến dịch tốt hơn
+   - Team 2 dẫn đầu DT & KG cả 2 năm; Team 4 tăng trưởng nhanh nhất (+31% DT)
+   - Team 3 giảm DT năm nay dù KG tăng → giá bán/đơn thấp hơn
+   - KH tăng mạnh T5–T6 (campaign), hụt T7–T8, bật lại T9
+   - Cohort: T1 và T6 có retention tốt nhất (T1 = khách trung thành, T6 = campaign chất lượng)
+*/
+const rawData={
+  all:{
+    // DT (triệu): đỉnh T6 nhờ campaign Hè, sụt T7-T8, phục hồi T9-T10
+    revTY:[198, 215, 268, 312, 378, 465, 398, 372, 420, 445, 388, 342],
+    revLY:[172, 188, 231, 258, 295, 318, 305, 298, 335, 352, 310, 275],
+    // KG: đồng pha với DT, năm nay vượt đều
+    kgTY:[3100, 3400, 4200, 4900, 5800, 7100, 6200, 5800, 6500, 6800, 5900, 5200],
+    kgLY:[2650, 2900, 3600, 4100, 4800, 5800, 5400, 5100, 5600, 5900, 5100, 4500],
+  },
+};
+const teamColors=['#e91e8c','#0ab5a0','#d4960a','#3b6fd4','#6b3fa0'];
+const teamData={
+  teams:['Team 1','Team 2','Team 3','Team 4','Team 5'],
+  // Team 2 dẫn đầu; Team 4 tăng mạnh; Team 3 DT giảm dù KG tăng
+  revTY:[612, 854, 578, 731, 645],
+  revLY:[580, 790, 632, 558, 610],
+  kgTY:[ 9800,13500, 9200,11600,10100],
+  kgLY:[ 8900,12200, 8600, 8800, 9400],
+};
+// KH tăng mạnh T5-T6, hụt T7-T8, bật T9
+const custTY=[105, 118, 142, 168, 215, 278, 231, 198, 245, 262, 228, 195];
+const custLY=[ 88,  98, 119, 135, 162, 198, 185, 172, 195, 208, 182, 158];
+// KH mới: cao T5-T6 (campaign acquisition), dần ổn định cuối năm
+// KH cũ: T1-T3 chiếm tỉ trọng cao (khách trung thành), tăng dần từ T9 (retention tốt)
+// ROAS: tăng mạnh T5-T6 (campaign hiệu quả), sụt T7-T8, phục hồi T9-T10
+const roasTY=[6.2, 6.8, 7.4, 8.1, 9.2,11.5, 8.8, 8.2, 9.5,10.1, 8.9, 7.8];
+const roasLY=[5.5, 5.9, 6.5, 7.0, 7.8, 8.6, 8.1, 7.9, 8.5, 9.0, 8.0, 7.1];
+const newCustPct=[72,68,65,60,75,80,71,66,58,55,52,50]; // % KH mới theo tháng
+const oldCustPct=newCustPct.map(v=>100-v);               // % KH cũ quay lại
+
+const GR='rgba(0,0,0,0.05)', TK='#a0a0c0';
+let c1,c2,c3,cROAS;
+const vis={kgTY:true,kgLY:true,revTY:true,revLY:true};
+const vis2={kgTY:true,kgLY:true,revTY:true,revLY:true};
+
+function buildChart1(){
+  const d=rawData.all;
+  if(c1)c1.destroy();
+  c1=new Chart(document.getElementById('chart1'),{
+    data:{labels:months,datasets:[
+      {type:'bar', label:'DT Năm nay',   data:d.revTY, backgroundColor:'rgba(233,30,140,0.55)', borderRadius:3, yAxisID:'yR', hidden:!vis.revTY, borderSkipped:false},
+      {type:'bar', label:'DT Năm ngoái', data:d.revLY, backgroundColor:'rgba(233,30,140,0.18)', borderRadius:3, yAxisID:'yR', hidden:!vis.revLY, borderSkipped:false},
+      {type:'line',label:'KG Năm nay',   data:d.kgTY,  borderColor:'#42a5f5',borderWidth:2,pointRadius:3,pointBackgroundColor:'#42a5f5',tension:0.4,yAxisID:'yK',hidden:!vis.kgTY,fill:false},
+      {type:'line',label:'KG Năm ngoái', data:d.kgLY,  borderColor:'rgba(66,165,245,0.35)',borderWidth:2,borderDash:[5,4],pointRadius:2,tension:0.4,yAxisID:'yK',hidden:!vis.kgLY,fill:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:TK,font:{size:11},autoSkip:false},grid:{color:GR}},
+        yR:{position:'left',ticks:{color:'#e91e8c',font:{size:10},callback:v=>v+'M'},grid:{color:GR}},
+        yK:{position:'right',ticks:{color:'#42a5f5',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'K':v},grid:{drawOnChartArea:false}}
+      }}
+  });
+}
+function applyChart1Filters(){
+  const kg=document.getElementById('filterKg').value;
+  const rev=document.getElementById('filterRev').value;
+  vis.kgTY  = kg==='both'||kg==='ty';
+  vis.kgLY  = kg==='both'||kg==='ly';
+  vis.revTY = rev==='both'||rev==='ty';
+  vis.revLY = rev==='both'||rev==='ly';
+  buildChart1();
+}
+function applyChart2Filters(){
+  const kg=document.getElementById('filterKgTeam').value;
+  const rev=document.getElementById('filterRevTeam').value;
+  vis2.kgTY  = kg==='both'||kg==='ty';
+  vis2.kgLY  = kg==='both'||kg==='ly';
+  vis2.revTY = rev==='both'||rev==='ty';
+  vis2.revLY = rev==='both'||rev==='ly';
+  buildChart2();
+}
+
+function buildChart2(){
+  if(c2)c2.destroy();
+  c2=new Chart(document.getElementById('chart2'),{
+    data:{labels:teamData.teams,datasets:[
+      {type:'bar', label:'DT Năm nay',   data:teamData.revTY, backgroundColor:'rgba(233,30,140,0.6)', borderRadius:4, yAxisID:'yR', borderSkipped:false, barPercentage:0.55, categoryPercentage:0.7, hidden:!vis2.revTY},
+      {type:'bar', label:'DT Năm ngoái', data:teamData.revLY, backgroundColor:'rgba(233,30,140,0.2)', borderRadius:4, yAxisID:'yR', borderSkipped:false, barPercentage:0.55, categoryPercentage:0.7, hidden:!vis2.revLY},
+      {type:'line',label:'KG Năm nay',   data:teamData.kgTY,  borderColor:'#42a5f5', borderWidth:2.5, pointRadius:5, pointBackgroundColor:'#42a5f5', tension:0.3, yAxisID:'yK', fill:false, hidden:!vis2.kgTY},
+      {type:'line',label:'KG Năm ngoái', data:teamData.kgLY,  borderColor:'rgba(66,165,245,0.4)', borderWidth:2, borderDash:[5,4], pointRadius:4, pointBackgroundColor:'rgba(66,165,245,0.4)', tension:0.3, yAxisID:'yK', fill:false, hidden:!vis2.kgLY},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:TK,font:{size:12}},grid:{color:GR}},
+        yR:{position:'left',ticks:{color:'#e91e8c',font:{size:10},callback:v=>v+'M'},grid:{color:GR}},
+        yK:{position:'right',ticks:{color:'#42a5f5',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{drawOnChartArea:false}}
+      }}
+  });
+}
+
+function buildChart3(){
+  if(c3)c3.destroy();
+  // tính lũy kế
+  const cumul=custTY.reduce((acc,v,i)=>{acc.push((acc[i-1]||0)+v);return acc;},[]);
+  c3=new Chart(document.getElementById('chart3'),{
+    data:{labels:months,datasets:[
+      {type:'bar', label:'KH theo tháng', data:custTY, backgroundColor:'rgba(233,30,140,0.55)', borderRadius:3, yAxisID:'yM', borderSkipped:false},
+      {type:'line',label:'Lũy kế KH',    data:cumul,  borderColor:'#6b3fa0', borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#6b3fa0', tension:0.4, yAxisID:'yCu', fill:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:TK,font:{size:11},autoSkip:false},grid:{color:GR}},
+        yM:{position:'left', ticks:{color:'#e91e8c',font:{size:10}}, grid:{color:GR}},
+        yCu:{position:'right',ticks:{color:'#6b3fa0',font:{size:10}},grid:{drawOnChartArea:false}}
+      }}
+  });
+}
+
+// ── CHART ROAS ──
+function buildChartROAS(){
+  if(cROAS)cROAS.destroy();
+  cROAS=new Chart(document.getElementById('chartROAS'),{
+    type:'line',
+    data:{labels:months,datasets:[
+      {label:'ROAS Năm nay',   data:roasTY, borderColor:'#0ab5a0', borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#0ab5a0', tension:0.4, fill:true, backgroundColor:'rgba(10,181,160,0.08)'},
+      {label:'ROAS Năm ngoái',data:roasLY, borderColor:'rgba(10,181,160,0.4)', borderWidth:2, borderDash:[5,4], pointRadius:2, tension:0.4, fill:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw}x`}}},
+      scales:{
+        x:{ticks:{color:TK,font:{size:11},autoSkip:false},grid:{color:GR}},
+        y:{ticks:{color:'#0ab5a0',font:{size:10},callback:v=>v+'x'}, grid:{color:GR}, suggestedMin:4}
+      }}
+  });
+}
+
+// ── CHART 4: Stacked 100% KH mới/cũ ──
+let c4;
+function buildChart4(){
+  if(c4)c4.destroy();
+  c4=new Chart(document.getElementById('chart4'),{
+    type:'bar',
+    data:{labels:months,datasets:[
+      {label:'KH mới',         data:newCustPct, backgroundColor:'rgba(233,30,140,0.75)', borderRadius:0, stack:'s'},
+      {label:'KH cũ quay lại', data:oldCustPct, backgroundColor:'rgba(66,165,245,0.75)',  borderRadius:0, stack:'s'},
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw}%`}}
+      },
+      scales:{
+        x:{ticks:{color:TK,font:{size:11}}, grid:{color:GR}, stacked:true},
+        y:{ticks:{color:TK,font:{size:10},callback:v=>v+'%'}, grid:{color:GR}, stacked:true, min:0, max:100}
+      }
+    }
+  });
+}
+
+const funnelData=[
+  // Drop-off lớn ở Reply→Tư vấn (63%→34%) → cần cải thiện chất lượng tư vấn
+  {label:'Lead (Qualified)',count:12580,pct:100,bg:'#e91e8c',note:'12,580 leads'},
+  {label:'Reply',           count: 7926,pct: 63,bg:'#d4158a',note:'7,926 KH'},
+  {label:'Tư vấn báo giá', count: 4277,pct: 34,bg:'#42a5f5',note:'4,277 KH'},
+  {label:'Invoice chờ',    count: 2894,pct: 23,bg:'#3b6fd4',note:'2,894 KH'},
+  {label:'Đã thanh toán',  count: 2389,pct: 19,bg:'#1565c0',note:'2,389 KH'},
+];
+function buildFunnel(){
+  document.getElementById('funnelWrap').innerHTML=funnelData.map(f=>`
+    <div class="funnel-row">
+      <div class="funnel-label-col">${f.label}</div>
+      <div class="funnel-track">
+        <div class="funnel-fill" style="width:${f.pct}%;background:${f.bg};">
+          <span class="funnel-pct">${f.pct}%</span>
+        </div>
+      </div>
+      <div class="funnel-right" style="color:${f.bg};">${f.pct}%</div>
+    </div>`).join('');
+}
+
+function buildCohort(){
+  const rL=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  const cL=['M+0','M+1','M+2','M+3','M+4','M+5','M+6','M+7','M+8','M+9','M+10','M+11','M+12'];
+  // T1: KH trung thành, retention cao nhất toàn năm
+  // T6: campaign Hè chất lượng, KH quay lại tốt dù acquisition lớn
+  // T7–T8: KH thấp nhất, nhiều KH mua 1 lần rồi rời
+  const data=[
+    [100,81,68,57,51,46,42,39,36,33,31,29,27], // T1 - retention tốt nhất
+    [100,72,58,48,41,36,32,29,26,24,22,20,null],
+    [100,69,54,44,38,33,29,26,23,21,19,null,null],
+    [100,74,60,50,44,39,34,31,28,25,null,null,null],
+    [100,78,65,55,49,43,38,35,31,null,null,null,null], // T5 - campaign tốt
+    [100,80,67,57,51,45,40,37,null,null,null,null,null], // T6 - Hè tốt
+    [100,58,42,33,27,23,19,null,null,null,null,null,null], // T7 - thấp
+    [100,55,40,31,25,21,null,null,null,null,null,null,null], // T8 - thấp nhất
+    [100,70,56,46,40,null,null,null,null,null,null,null,null],
+    [100,75,62,52,null,null,null,null,null,null,null,null,null],
+    [100,73,59,null,null,null,null,null,null,null,null,null,null],
+    [100,76,null,null,null,null,null,null,null,null,null,null,null],
+  ];
+  function cs(v){
+    if(v===null)return 'background:transparent;color:transparent;';
+    if(v>=80)return 'background:#6b3fa0;color:#fff;';
+    if(v>=60)return 'background:#9c6fd4;color:#fff;';
+    if(v>=40)return 'background:#c9a8e8;color:#3b1a6e;';
+    if(v>=20)return 'background:#e5d4f5;color:#5a2d9a;';
+    return 'background:#f5effc;color:#7c4dbf;';
+  }
+  let h='<thead><tr><th class="row-header">Tháng</th>'+cL.map(c=>`<th>${c}</th>`).join('')+'</tr></thead><tbody>';
+  data.forEach((row,i)=>{
+    h+=`<tr><th class="row-header">${rL[i]}</th>`+row.map(v=>`<td class="hm-cell" style="${cs(v)}">${v!==null?v+'%':''}</td>`).join('')+'</tr>';
+  });
+  document.getElementById('cohortTable').innerHTML=h+'</tbody>';
+}
+
+function resetFilters(){document.getElementById('dateFrom').value='2024-01-01';document.getElementById('dateTo').value='2024-12-31';document.getElementById('teamFilter').value='all';}
+
+// ── PAGE 2 DATA ──
+const p2kg={
+  ty:[3100,3400,4200,4900,5800,7100,6200,5800,6500,6800,5900,5200],
+  ly:[2650,2900,3600,4100,4800,5800,5400,5100,5600,5900,5100,4500]
+};
+// Heatmap DT theo team x level KH (triệu)
+// Titan: KH VIP cao cấp nhất, chi tiêu lớn; VIP3: mới nâng hạng
+const heatmapData={
+  teams:['Team 1','Team 2','Team 3','Team 4','Team 5'],
+  levels:['Titan','VIP 1','VIP 2','VIP 3'],
+  values:[
+    // Titan   VIP1   VIP2   VIP3
+    [  182,    145,    98,    52 ],  // Team 1
+    [  248,    198,   132,    68 ],  // Team 2 - dẫn đầu mọi level
+    [  124,    108,    84,    41 ],  // Team 3 - yếu nhất Titan
+    [  210,    175,   115,    62 ],  // Team 4 - mạnh Titan
+    [  168,    142,   105,    58 ],  // Team 5
+  ]
+};
+// Decomposition tree: DT theo nguồn → kênh
+const decompData={
+  total: 3420,
+  sources:[
+    { name:'Ads', value:2052, pct:60, color:'#e91e8c',
+      channels:[
+        {name:'Facebook', value:923, pct:45, color:'#3b6fd4'},
+        {name:'Instagram',value:574, pct:28, color:'#d4960a'},
+        {name:'Web',      value:369, pct:18, color:'#0ab5a0'},
+        {name:'WhatsApp', value:186, pct:9,  color:'#6b3fa0'},
+      ]
+    },
+    { name:'Organic', value:1368, pct:40, color:'#42a5f5',
+      channels:[
+        {name:'Facebook', value:479, pct:35, color:'#3b6fd4'},
+        {name:'Instagram',value:342, pct:25, color:'#d4960a'},
+        {name:'Web',      value:383, pct:28, color:'#0ab5a0'},
+        {name:'WhatsApp', value:164, pct:12, color:'#6b3fa0'},
+      ]
+    }
+  ]
+};
+
+let cKG2;
+function buildKGChart(){
+  if(cKG2)cKG2.destroy();
+  cKG2=new Chart(document.getElementById('chartKG2'),{
+    type:'line',
+    data:{labels:months,datasets:[
+      {label:'KG Năm nay',   data:p2kg.ty, borderColor:'#e91e8c', borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#e91e8c', tension:0.4, fill:true, backgroundColor:'rgba(233,30,140,0.07)'},
+      {label:'KG Năm ngoái',data:p2kg.ly, borderColor:'rgba(233,30,140,0.35)', borderWidth:2, borderDash:[5,4], pointRadius:2, tension:0.4, fill:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:TK,font:{size:11},autoSkip:false},grid:{color:GR}},
+        y:{ticks:{color:'#e91e8c',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'K':v},grid:{color:GR}}
+      }}
+  });
+}
+
+function buildHeatmap2(){
+  const d=heatmapData;
+  const maxVal=Math.max(...d.values.flat());
+  function cellStyle(v){
+    const ratio=v/maxVal;
+    if(ratio>=0.8)return 'background:#e91e8c;color:#fff;';
+    if(ratio>=0.6)return 'background:#f06ab3;color:#fff;';
+    if(ratio>=0.4)return 'background:#f9a8d4;color:#831843;';
+    if(ratio>=0.2)return 'background:#fce4f1;color:#be185d;';
+    return 'background:#fef5fa;color:#c0166f;';
+  }
+  let h='<thead><tr><th class="row-header" style="min-width:52px;">Team</th>'+d.levels.map(l=>`<th style="padding:4px 8px;color:var(--text2);font-weight:600;text-align:center;">${l}</th>`).join('')+'</tr></thead><tbody>';
+  d.teams.forEach((t,i)=>{
+    h+=`<tr><th class="row-header" style="color:var(--text2);font-weight:700;padding:5px 6px;">${t}</th>`;
+    d.values[i].forEach(v=>{
+      h+=`<td class="hm-cell" style="${cellStyle(v)}font-size:11px;width:auto;height:28px;padding:4px;">${v}M</td>`;
+    });
+    h+='</tr>';
+  });
+  document.getElementById('heatmap2').innerHTML=h+'</tbody>';
+}
+
+function buildDecomp(){
+  const el=document.getElementById('decompTree');
+  const d=decompData;
+  const BAR='#2196f3'; // Power BI blue bar
+  const ACTIVE='#1565c0';
+
+  // layout: root → sources → channels (SVG-based connector lines like Power BI)
+  // We'll use HTML with SVG for the curved/angled connector lines
+
+  // Collect all channel nodes for right column
+  const allChannels=[];
+  d.sources.forEach(src=>{
+    src.channels.forEach(ch=>{
+      allChannels.push({...ch, srcName:src.name, srcValue:src.value});
+    });
+  });
+  const maxCh=Math.max(...allChannels.map(c=>c.value));
+  const maxSrc=Math.max(...d.sources.map(s=>s.value));
+
+  function fmtVal(v){ return v>=1000?(v/1000).toFixed(2)+'T':(v+'M'); }
+
+  // Node heights to compute vertical positions for SVG lines
+  const ROW_H=48; // px per channel row
+  const SRC_H=64; // px per source block
+  const PAD=8;
+
+  // Build HTML layout: 3-column flex with SVG overlay
+  const totalChs=allChannels.length;
+  const svgH=Math.max(totalChs*ROW_H+PAD*2, d.sources.length*SRC_H+PAD*2, 80);
+  const svgW=560;
+
+  // Positions
+  const rootX=10, rootY=svgH/2;
+  const srcX=170;
+  const chX=390;
+
+  // Source vertical centers
+  let srcCenters=[];
+  let chCenters=[];
+  let chIdx=0;
+  d.sources.forEach((src,si)=>{
+    // Place sources evenly in top half and bottom half based on channel count
+    const srcChStart=chIdx;
+    const srcChEnd=chIdx+src.channels.length-1;
+    const topCh=PAD+srcChStart*ROW_H+ROW_H/2;
+    const botCh=PAD+srcChEnd*ROW_H+ROW_H/2;
+    srcCenters.push((topCh+botCh)/2);
+    src.channels.forEach((ch,ci)=>{
+      chCenters.push(PAD+chIdx*ROW_H+ROW_H/2);
+      chIdx++;
+    });
+  });
+  const rootCy=(srcCenters[0]+srcCenters[srcCenters.length-1])/2;
+
+  // SVG lines
+  let svgLines='';
+  // root → each source
+  d.sources.forEach((src,si)=>{
+    const sy=srcCenters[si];
+    svgLines+=`<path d="M${rootX+120},${rootCy} C${(rootX+120+srcX)/2},${rootCy} ${(rootX+120+srcX)/2},${sy} ${srcX},${sy}" fill="none" stroke="#c0d0e8" stroke-width="1.5"/>`;
+  });
+  // each source → its channels
+  let chOffset=0;
+  d.sources.forEach((src,si)=>{
+    const sy=srcCenters[si];
+    src.channels.forEach((ch,ci)=>{
+      const cy=chCenters[chOffset+ci];
+      svgLines+=`<path d="M${srcX+100},${sy} C${(srcX+100+chX)/2},${sy} ${(srcX+100+chX)/2},${cy} ${chX},${cy}" fill="none" stroke="#c0d0e8" stroke-width="1.2"/>`;
+    });
+    chOffset+=src.channels.length;
+  });
+
+  // Root node HTML (absolutely positioned)
+  const rootNodeW=118, srcNodeW=100, chNodeW=140;
+
+  let html=`<div style="position:relative;width:100%;overflow-x:auto;">
+  <div style="position:relative;min-width:${svgW}px;height:${svgH}px;">
+    <svg style="position:absolute;top:0;left:0;width:100%;height:${svgH}px;pointer-events:none;" xmlns="http://www.w3.org/2000/svg">${svgLines}</svg>
+
+    <!-- ROOT NODE -->
+    <div style="position:absolute;left:${rootX}px;top:${rootCy-32}px;width:${rootNodeW}px;">
+      <div style="background:#fff;border:1px solid #d0d8e8;border-radius:4px;padding:8px 10px;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+        <div style="font-size:10px;color:#888;font-weight:500;margin-bottom:2px;">Tổng DT</div>
+        <div style="font-size:15px;font-weight:800;color:#1a1a2e;">${fmtVal(d.total*1000/1000)}</div>
+        <div style="height:4px;background:#2196f3;border-radius:2px;margin-top:5px;width:100%;"></div>
+      </div>
+    </div>`;
+
+  // Source nodes
+  d.sources.forEach((src,si)=>{
+    const sy=srcCenters[si];
+    const barW=Math.round((src.value/maxSrc)*100);
+    html+=`
+    <div style="position:absolute;left:${srcX}px;top:${sy-30}px;width:${srcNodeW}px;">
+      <div style="background:#fff;border:1px solid #d0d8e8;border-radius:4px;padding:7px 9px;box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+        <div style="font-size:10px;color:#888;font-weight:500;margin-bottom:1px;">${src.name}</div>
+        <div style="font-size:14px;font-weight:800;color:#1a1a2e;">${fmtVal(src.value)}</div>
+        <div style="height:3px;background:#e8eaf0;border-radius:2px;margin-top:4px;"><div style="width:${barW}%;height:100%;background:#2196f3;border-radius:2px;"></div></div>
+        <div style="font-size:10px;color:#2196f3;font-weight:600;margin-top:2px;">${src.pct}%</div>
+      </div>
+    </div>`;
+  });
+
+  // Channel nodes
+  allChannels.forEach((ch,i)=>{
+    const cy=chCenters[i];
+    const barW=Math.round((ch.value/maxCh)*100);
+    html+=`
+    <div style="position:absolute;left:${chX}px;top:${cy-22}px;width:${chNodeW}px;">
+      <div style="background:#fff;border:1px solid #d0d8e8;border-radius:4px;padding:5px 9px;box-shadow:0 1px 3px rgba(0,0,0,0.06);display:flex;align-items:center;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:10px;color:#555;font-weight:600;white-space:nowrap;">${ch.name} <span style="color:#999;font-weight:400;">(${ch.srcName})</span></div>
+          <div style="font-size:12px;font-weight:800;color:#1a1a2e;">${fmtVal(ch.value)}</div>
+          <div style="height:3px;background:#e8eaf0;border-radius:2px;margin-top:3px;"><div style="width:${barW}%;height:100%;background:#2196f3;border-radius:2px;"></div></div>
+        </div>
+        <div style="font-size:11px;color:#2196f3;font-weight:700;white-space:nowrap;">${ch.pct}%</div>
+      </div>
+    </div>`;
+  });
+
+  html+=`</div></div>`;
+  el.innerHTML=html;
+}
+
+// ── MATRIX DATA ──
+(function generateMatrixData(){
+  window.matrixData=[];
+  const teams=[
+    {name:'Team 1',nvList:['Nguyễn Văn A','Trần Thị B','Lê Minh C']},
+    {name:'Team 2',nvList:['Phạm Thị D','Hoàng Văn E','Vũ Thị F','Đặng Văn G']},
+    {name:'Team 3',nvList:['Bùi Thị H','Ngô Văn I','Đỗ Thị J']},
+    {name:'Team 4',nvList:['Trịnh Văn K','Lý Thị L','Phan Văn M','Hồ Thị N']},
+    {name:'Team 5',nvList:['Dương Văn O','Cao Thị P','Đinh Văn Q']},
+  ];
+  const rand=(min,max)=>Math.round(min+(max-min)*Math.random());
+  const ordersPerNV=()=>rand(3,8);
+  teams.forEach(t=>{
+    const teamRow={type:'team',name:t.name,children:[],
+      kg:0,kgPhu:0,dt:0,ship:0,disc:0,cono:0,dtThuc:0};
+    t.nvList.forEach(nv=>{
+      const nvRow={type:'nv',name:nv,children:[],parent:t.name,
+        kg:0,kgPhu:0,dt:0,ship:0,disc:0,cono:0,dtThuc:0};
+      const nOrders=ordersPerNV();
+      for(let o=0;o<nOrders;o++){
+        const kg=rand(40,350);
+        const kgPhu=rand(5,50);
+        const dt=rand(500,8000)*1000;
+        const ship=rand(20,120)*1000;
+        const disc=rand(0,15)*10000;
+        const cono=Math.random()<0.25?rand(50,500)*1000:0;
+        const dtThuc=dt+ship-disc-cono;
+        const orderId='ORD-'+rand(10000,99999);
+        nvRow.children.push({type:'order',name:orderId,parent:nv,
+          kg,kgPhu,dt,ship,disc,cono,dtThuc});
+        nvRow.kg+=kg; nvRow.kgPhu+=kgPhu; nvRow.dt+=dt;
+        nvRow.ship+=ship; nvRow.disc+=disc; nvRow.cono+=cono; nvRow.dtThuc+=dtThuc;
+      }
+      teamRow.children.push(nvRow);
+      teamRow.kg+=nvRow.kg; teamRow.kgPhu+=nvRow.kgPhu; teamRow.dt+=nvRow.dt;
+      teamRow.ship+=nvRow.ship; teamRow.disc+=nvRow.disc; teamRow.cono+=nvRow.cono; teamRow.dtThuc+=nvRow.dtThuc;
+    });
+    window.matrixData.push(teamRow);
+  });
+})();
+
+// Expand state: teamName → {open, nvName → open}
+const mxState={};
+window.matrixData.forEach(t=>{mxState[t.name]={open:false,nv:{}};t.children.forEach(n=>{mxState[t.name].nv[n.name]=false;});});
+
+function fmtKg(v){return v>=1000?(v/1000).toFixed(1)+'K':v;}
+function fmtMoney(v){
+  if(v===0)return '<span style="color:#bbb;">—</span>';
+  if(v>=1000000000)return (v/1000000000).toFixed(2)+'T';
+  if(v>=1000000)return (v/1000000).toFixed(1)+'M';
+  return (v/1000).toFixed(0)+'K';
+}
+
+const MX_COLS=[
+  {key:'kg',   label:'Tổng KG',      fmt:fmtKg},
+  {key:'kgPhu',label:'KG Phụ kiện',  fmt:fmtKg},
+  {key:'dt',   label:'Tổng DT',      fmt:fmtMoney},
+  {key:'ship', label:'Phí ship',      fmt:fmtMoney},
+  {key:'disc', label:'Discount',      fmt:fmtMoney},
+  {key:'cono', label:'Công nợ',       fmt:fmtMoney},
+  {key:'dtThuc',label:'DT Thực',     fmt:fmtMoney},
+];
+
+function buildMatrix(){
+  // Header
+  const thead=document.getElementById('matrixHead');
+  thead.innerHTML=`<tr style="background:#1a1a2e;color:#fff;">
+    <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;white-space:nowrap;position:sticky;left:0;background:#1a1a2e;min-width:200px;">Team / NV / Mã đơn</th>
+    ${MX_COLS.map(c=>`<th style="padding:9px 10px;text-align:right;font-size:11px;font-weight:700;white-space:nowrap;">${c.label}</th>`).join('')}
+  </tr>`;
+
+  renderMatrix();
+}
+
+function renderMatrix(){
+  const tbody=document.getElementById('matrixBody');
+  let rows='';
+
+  window.matrixData.forEach((team,ti)=>{
+    const tOpen=mxState[team.name].open;
+    const bgTeam='#fdf0f9';
+    const icon=tOpen?'▼':'▶';
+    rows+=`<tr class="mx-team" style="background:${bgTeam};cursor:pointer;border-bottom:2px solid #e91e8c20;" onclick="toggleTeam('${team.name.replace(/'/g,"\'")}')">
+      <td style="padding:9px 12px;font-weight:700;font-size:12px;position:sticky;left:0;background:${bgTeam};white-space:nowrap;">
+        <span style="color:#e91e8c;margin-right:6px;font-size:10px;">${icon}</span>${team.name}
+      </td>
+      ${MX_COLS.map(c=>`<td style="padding:9px 10px;text-align:right;font-weight:700;font-size:12px;color:#1a1a2e;">${c.fmt(team[c.key])}</td>`).join('')}
+    </tr>`;
+
+    if(tOpen){
+      team.children.forEach((nv,ni)=>{
+        const nvOpen=mxState[team.name].nv[nv.name];
+        const bgNV='#fff';
+        const nvIcon=nvOpen?'▼':'▶';
+        rows+=`<tr class="mx-nv" style="background:${bgNV};cursor:pointer;border-bottom:1px solid #f0e0ec;" onclick="toggleNV('${team.name.replace(/'/g,"\'")}','${nv.name.replace(/'/g,"\'")}')">
+          <td style="padding:8px 12px 8px 28px;font-weight:600;font-size:11.5px;position:sticky;left:0;background:${bgNV};white-space:nowrap;">
+            <span style="color:#7a4060;margin-right:6px;font-size:10px;">${nvIcon}</span>${nv.name}
+          </td>
+          ${MX_COLS.map(c=>`<td style="padding:8px 10px;text-align:right;font-size:11.5px;font-weight:600;color:#3a1a2e;">${c.fmt(nv[c.key])}</td>`).join('')}
+        </tr>`;
+
+        if(nvOpen){
+          nv.children.forEach((ord,oi)=>{
+            const bg=oi%2===0?'#fafafa':'#fff';
+            rows+=`<tr style="background:${bg};border-bottom:1px solid #f5f0f8;">
+              <td style="padding:6px 12px 6px 48px;font-size:11px;color:#5a3a5a;position:sticky;left:0;background:${bg};white-space:nowrap;">
+                <span style="color:#ccc;margin-right:6px;">└</span><span style="font-family:monospace;color:#7c5a9a;">${ord.name}</span>
+              </td>
+              ${MX_COLS.map(c=>`<td style="padding:6px 10px;text-align:right;font-size:11px;color:#3a2a4e;">${c.fmt(ord[c.key])}</td>`).join('')}
+            </tr>`;
+          });
+        }
+      });
+
+      // NV subtotal row
+      rows+=`<tr style="background:#fce4f1;border-bottom:2px solid #e91e8c40;">
+        <td style="padding:7px 12px 7px 28px;font-weight:700;font-size:11px;color:#a0186a;position:sticky;left:0;background:#fce4f1;white-space:nowrap;">Tổng ${team.name}</td>
+        ${MX_COLS.map(c=>`<td style="padding:7px 10px;text-align:right;font-weight:700;font-size:11px;color:#a0186a;">${c.fmt(team[c.key])}</td>`).join('')}
+      </tr>`;
+    }
+  });
+
+  // Grand total
+  const gt={kg:0,kgPhu:0,dt:0,ship:0,disc:0,cono:0,dtThuc:0};
+  window.matrixData.forEach(t=>{MX_COLS.forEach(c=>{gt[c.key]+=t[c.key];});});
+  rows+=`<tr style="background:#1a1a2e;">
+    <td style="padding:10px 12px;font-weight:800;font-size:12px;color:#fff;position:sticky;left:0;background:#1a1a2e;white-space:nowrap;">Tổng cộng</td>
+    ${MX_COLS.map(c=>`<td style="padding:10px 10px;text-align:right;font-weight:800;font-size:12px;color:#fff;">${c.fmt(gt[c.key])}</td>`).join('')}
+  </tr>`;
+
+  tbody.innerHTML=rows;
+}
+
+function toggleTeam(name){
+  mxState[name].open=!mxState[name].open;
+  renderMatrix();
+}
+function toggleNV(team,nv){
+  mxState[team].nv[nv]=!mxState[team].nv[nv];
+  renderMatrix();
+}
+function matrixExpandAll(){
+  window.matrixData.forEach(t=>{
+    mxState[t.name].open=true;
+    t.children.forEach(n=>{mxState[t.name].nv[n.name]=true;});
+  });
+  renderMatrix();
+}
+function matrixCollapseAll(){
+  window.matrixData.forEach(t=>{
+    mxState[t.name].open=false;
+    t.children.forEach(n=>{mxState[t.name].nv[n.name]=false;});
+  });
+  renderMatrix();
+}
+
+// ── PAGE 3 DATA ──
+const p3CustTY=[105,118,142,168,215,278,231,198,245,262,228,195];
+const p3NewPct=[72,68,65,60,75,80,71,66,58,55,52,50];
+const p3OldPct=p3NewPct.map(v=>100-v);
+const p3HeatKH={
+  teams:['Team 1','Team 2','Team 3','Team 4','Team 5'],
+  levels:['Titan','VIP 1','VIP 2','VIP 3'],
+  values:[[42,88,120,62],[58,120,168,85],[35,72,98,48],[50,105,145,72],[44,92,128,68]]
+};
+const p3RetentionCohort=[
+  [100,81,68,57,51,46,42,39,36,33,31,29,27],
+  [100,72,58,48,41,36,32,29,26,24,22,20,null],
+  [100,69,54,44,38,33,29,26,23,21,19,null,null],
+  [100,74,60,50,44,39,34,31,28,25,null,null,null],
+  [100,78,65,55,49,43,38,35,31,null,null,null,null],
+  [100,80,67,57,51,45,40,37,null,null,null,null,null],
+  [100,58,42,33,27,23,19,null,null,null,null,null,null],
+  [100,55,40,31,25,21,null,null,null,null,null,null,null],
+  [100,70,56,46,40,null,null,null,null,null,null,null,null],
+  [100,75,62,52,null,null,null,null,null,null,null,null,null],
+  [100,73,59,null,null,null,null,null,null,null,null,null,null],
+  [100,76,null,null,null,null,null,null,null,null,null,null,null],
+];
+// Revenue cohort (avg DT/KH quay lại, triệu đồng)
+const p3RevCohort=[
+  [1.42,1.68,1.85,1.92,2.10,2.24,2.18,2.31,2.28,2.35,2.42,2.48,2.55],
+  [1.35,1.58,1.72,1.80,1.95,2.08,2.02,2.15,2.12,2.19,2.25,2.30,null],
+  [1.28,1.50,1.65,1.74,1.88,2.00,1.95,2.06,2.04,2.10,2.16,null,null],
+  [1.38,1.62,1.78,1.86,2.02,2.15,2.08,2.20,2.18,2.24,null,null,null],
+  [1.44,1.70,1.88,1.96,2.14,2.28,2.22,2.34,2.31,null,null,null,null],
+  [1.52,1.80,1.98,2.08,2.26,2.40,2.34,2.46,null,null,null,null,null],
+  [1.22,1.42,1.55,1.62,1.74,1.85,1.80,null,null,null,null,null,null],
+  [1.18,1.38,1.50,1.58,1.70,1.80,null,null,null,null,null,null,null],
+  [1.32,1.56,1.70,1.78,1.92,null,null,null,null,null,null,null,null],
+  [1.40,1.64,1.80,1.88,null,null,null,null,null,null,null,null,null],
+  [1.36,1.60,1.75,null,null,null,null,null,null,null,null,null,null],
+  [1.45,1.70,null,null,null,null,null,null,null,null,null,null,null],
+];
+
+let p3c1,p3c2;
+
+function buildP3Chart1(){
+  if(p3c1)p3c1.destroy();
+  const cumul=p3CustTY.reduce((a,v,i)=>{a.push((a[i-1]||0)+v);return a;},[]);
+  p3c1=new Chart(document.getElementById('p3chart1'),{
+    data:{labels:months,datasets:[
+      {type:'bar', label:'KH/tháng',data:p3CustTY,backgroundColor:'rgba(59,111,212,0.55)',borderRadius:3,yAxisID:'yM',borderSkipped:false},
+      {type:'line',label:'Lũy kế',  data:cumul,   borderColor:'#6b3fa0',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#6b3fa0',tension:0.4,yAxisID:'yCu',fill:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:TK,font:{size:11},autoSkip:false},grid:{color:GR}},
+        yM:{position:'left', ticks:{color:'#3b6fd4',font:{size:10}},grid:{color:GR}},
+        yCu:{position:'right',ticks:{color:'#6b3fa0',font:{size:10}},grid:{drawOnChartArea:false}}
+      }}
+  });
+}
+
+function buildP3Chart2(){
+  if(p3c2)p3c2.destroy();
+  p3c2=new Chart(document.getElementById('p3chart2'),{
+    type:'bar',
+    data:{labels:months,datasets:[
+      {label:'KH mới',        data:p3NewPct,backgroundColor:'rgba(233,30,140,0.75)',stack:'s'},
+      {label:'KH cũ quay lại',data:p3OldPct,backgroundColor:'rgba(10,181,160,0.75)', stack:'s'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw}%`}}},
+      scales:{
+        x:{ticks:{color:TK,font:{size:11}},grid:{color:GR},stacked:true},
+        y:{ticks:{color:TK,font:{size:10},callback:v=>v+'%'},grid:{color:GR},stacked:true,min:0,max:100}
+      }}
+  });
+}
+
+function buildP3Heatmap(){
+  const d=p3HeatKH;
+  const mx=Math.max(...d.values.flat());
+  function cs(v){
+    const r=v/mx;
+    if(r>=0.8)return'background:#3b6fd4;color:#fff;';
+    if(r>=0.6)return'background:#6690d8;color:#fff;';
+    if(r>=0.4)return'background:#99b5e8;color:#1a2a5a;';
+    if(r>=0.2)return'background:#ccd8f2;color:#2a3a7a;';
+    return'background:#eef2fc;color:#3b6fd4;';
+  }
+  let h='<thead><tr><th class="row-header" style="min-width:52px;">Team</th>'+d.levels.map(l=>`<th style="padding:4px 8px;color:var(--text2);font-weight:600;text-align:center;">${l}</th>`).join('')+'<th style="padding:4px 8px;color:var(--text2);font-weight:700;text-align:center;">Total</th></tr></thead><tbody>';
+  d.teams.forEach((t,i)=>{
+    const rowSum=d.values[i].reduce((a,v)=>a+v,0);
+    h+=`<tr><th class="row-header" style="color:var(--text2);font-weight:700;padding:5px 6px;">${t}</th>`;
+    d.values[i].forEach(v=>{h+=`<td class="hm-cell" style="${cs(v)}font-size:11px;width:auto;height:26px;padding:3px;">${v}</td>`;});
+    h+=`<td style="padding:4px 8px;text-align:center;font-weight:700;font-size:11px;color:#3b6fd4;">${rowSum}</td></tr>`;
+  });
+  const colTotals=d.levels.map((_,ci)=>d.values.reduce((a,r)=>a+r[ci],0));
+  const grandTotal=colTotals.reduce((a,v)=>a+v,0);
+  h+=`<tr style="background:#eef2fc;"><th class="row-header" style="font-weight:700;color:#3b6fd4;padding:5px 6px;">Total</th>${colTotals.map(v=>`<td style="padding:4px 8px;text-align:center;font-weight:700;font-size:11px;color:#3b6fd4;">${v}</td>`).join('')}<td style="padding:4px 8px;text-align:center;font-weight:800;font-size:11px;color:#3b6fd4;">${grandTotal}</td></tr>`;
+  document.getElementById('p3heatmap').innerHTML=h+'</tbody>';
+}
+
+let p3RFMInst;
+function buildP3RFMDonut(){
+  // 5 RFM segments with business-meaningful data
+  const segments=[
+    {label:'Trung thành',   val:528,  pct:22, color:'#3b6fd4', desc:'Mua thường xuyên, giá trị cao'},
+    {label:'Tiềm năng',     val:574,  pct:24, color:'#0ab5a0', desc:'Gần đây, tần suất tăng'},
+    {label:'Mới',           val:382,  pct:16, color:'#e91e8c', desc:'Mua lần đầu gần đây'},
+    {label:'Cần giữ chân',  val:430,  pct:18, color:'#d4960a', desc:'Trước đây tốt, đang giảm'},
+    {label:'Rủi ro',        val:475,  pct:20, color:'#e53030', desc:'Lâu không mua, giá trị thấp'},
+  ];
+  const total=segments.reduce((a,s)=>a+s.val,0);
+
+  if(p3RFMInst)p3RFMInst.destroy();
+  p3RFMInst=new Chart(document.getElementById('p3rfmDonut'),{
+    type:'doughnut',
+    data:{
+      labels:segments.map(s=>s.label),
+      datasets:[{
+        data:segments.map(s=>s.val),
+        backgroundColor:segments.map(s=>s.color),
+        borderWidth:2, borderColor:'#fff', hoverOffset:8
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw} KH (${Math.round(ctx.raw/total*100)}%)`}}
+      }
+    }
+  });
+
+  document.getElementById('p3rfmLegend').innerHTML=segments.map(s=>`
+    <div style="display:flex;align-items:center;gap:7px;">
+      <span style="width:10px;height:10px;border-radius:2px;background:${s.color};flex-shrink:0;display:inline-block;"></span>
+      <div>
+        <div style="font-weight:700;color:var(--text);">${s.label} <span style="color:${s.color};font-weight:800;">${s.pct}%</span></div>
+        <div style="font-size:10px;color:var(--text3);">${s.val} KH · ${s.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+function buildP3Cohorts(){
+  const rL=months;
+  const cL=['M+0','M+1','M+2','M+3','M+4','M+5','M+6','M+7','M+8','M+9','M+10','M+11','M+12'];
+  // Retention cohort (blue)
+  function csBlue(v){
+    if(v===null)return'background:transparent;color:transparent;';
+    if(v>=80)return'background:#3b6fd4;color:#fff;';
+    if(v>=60)return'background:#6690d8;color:#fff;';
+    if(v>=40)return'background:#99b5e8;color:#1a2a5a;';
+    if(v>=20)return'background:#ccd8f2;color:#2a3a7a;';
+    return'background:#eef2fc;color:#3b6fd4;';
+  }
+  // Revenue cohort (teal)
+  const maxRev=Math.max(...p3RevCohort.flat().filter(v=>v!==null));
+  function csTeal(v){
+    if(v===null)return'background:transparent;color:transparent;';
+    const r=v/maxRev;
+    if(r>=0.8)return'background:#0ab5a0;color:#fff;';
+    if(r>=0.6)return'background:#3dc9b8;color:#fff;';
+    if(r>=0.4)return'background:#80dcd5;color:#005a52;';
+    if(r>=0.2)return'background:#b8eeea;color:#006a60;';
+    return'background:#e0f8f6;color:#0ab5a0;';
+  }
+  function buildCohortTable(id,data,fmtFn,cssFn){
+    let h='<thead><tr><th class="row-header">Tháng</th>'+cL.map(c=>`<th>${c}</th>`).join('')+'</tr></thead><tbody>';
+    data.forEach((row,i)=>{
+      h+=`<tr><th class="row-header" style="color:var(--text2);">${rL[i]}</th>`;
+      row.forEach(v=>{h+=`<td class="hm-cell" style="${cssFn(v)}">${v!==null?fmtFn(v):''}</td>`;});
+      h+='</tr>';
+    });
+    document.getElementById(id).innerHTML=h+'</tbody>';
+  }
+  buildCohortTable('p3cohort1',p3RetentionCohort,v=>v+'%',csBlue);
+  buildCohortTable('p3cohort2',p3RevCohort,v=>v.toFixed(1)+'M',csTeal);
+}
+
+// ── PAGE 3 MATRIX DATA ──
+(function genP3Matrix(){
+  const brands=[
+    {name:'Team 1',customers:['Sophia Nguyen','James Lee','Emma Tran','Oliver Pham']},
+    {name:'Team 2',customers:['Liam Hoang','Ava Do','Noah Bui','Isabella Vo','William Dang']},
+    {name:'Team 3',customers:['Mia Trinh','Lucas Ngo','Charlotte Le','Mason Ha']},
+    {name:'Team 4',customers:['Ryan Pham','Julia Tran','Kevin Nguyen']},
+    {name:'Team 5',customers:['Anna Le','Thomas Vo','Lily Bui','Michael Do']},
+  ];
+  const countries=['Vietnam','USA','Japan','Germany','Australia','France','UK','Singapore'];
+  const rand=(a,b)=>Math.round(a+(b-a)*Math.random());
+  const randF=(a,b)=>+(a+(b-a)*Math.random()).toFixed(2);
+  const randDate=()=>{const d=new Date(2024,rand(0,11),rand(1,28));return d.toLocaleDateString('vi-VN');};
+  window.p3MatrixData=[];
+  brands.forEach(br=>{
+    const bRow={type:'brand',name:br.name,country:'—',orders:0,kg:0,kgPhu:0,dt:0,dtPhu:0,ship:0,disc:0,cono:0,dtThuc:0,lastOrder:'—',avgDays:'—',children:[]};
+    br.customers.forEach(cname=>{
+      const country=countries[rand(0,countries.length-1)];
+      const nOrders=rand(2,6);
+      const cRow={type:'customer',name:cname,country,orders:0,kg:0,kgPhu:0,dt:0,dtPhu:0,ship:0,disc:0,cono:0,dtThuc:0,lastOrder:'',avgDays:0,children:[],parent:br.name};
+      let lastTs=0; const tsList=[];
+      for(let o=0;o<nOrders;o++){
+        const kg=rand(30,400); const kgPhu=rand(5,60);
+        const dt=rand(600,9000)*1000; const dtPhu=rand(50,800)*1000;
+        const ship=rand(20,150)*1000; const disc=rand(0,20)*10000;
+        const cono=Math.random()<0.2?rand(50,600)*1000:0;
+        const dtThuc=dt+dtPhu+ship-disc-cono;
+        const yr=2024,mo=rand(0,11),dy=rand(1,28);
+        const ts=new Date(yr,mo,dy).getTime();
+        if(ts>lastTs)lastTs=ts;
+        tsList.push(ts);
+        const oid='CH-'+rand(10000,99999);
+        const oDate=new Date(ts).toLocaleDateString('vi-VN');
+        cRow.children.push({type:'order',name:oid,country,orders:1,kg,kgPhu,dt,dtPhu,ship,disc,cono,dtThuc,lastOrder:oDate,avgDays:'—'});
+        cRow.orders++; cRow.kg+=kg; cRow.kgPhu+=kgPhu; cRow.dt+=dt; cRow.dtPhu+=dtPhu;
+        cRow.ship+=ship; cRow.disc+=disc; cRow.cono+=cono; cRow.dtThuc+=dtThuc;
+      }
+      cRow.lastOrder=new Date(lastTs).toLocaleDateString('vi-VN');
+      tsList.sort((a,b)=>a-b);
+      if(tsList.length>1){
+        const diffs=tsList.slice(1).map((t,i)=>Math.round((t-tsList[i])/(1000*86400)));
+        cRow.avgDays=Math.round(diffs.reduce((a,v)=>a+v,0)/diffs.length)+'d';
+      } else cRow.avgDays='—';
+      bRow.children.push(cRow);
+      ['orders','kg','kgPhu','dt','dtPhu','ship','disc','cono','dtThuc'].forEach(k=>{bRow[k]+=cRow[k];});
+      if(!bRow.lastOrder||bRow.lastOrder==='—'||new Date(cRow.lastOrder)>new Date(bRow.lastOrder))bRow.lastOrder=cRow.lastOrder;
+    });
+    window.p3MatrixData.push(bRow);
+  });
+})();
+
+const p3State={};
+window.p3MatrixData.forEach(b=>{p3State[b.name]={open:false,cust:{}};b.children.forEach(c=>{p3State[b.name].cust[c.name]=false;});});
+
+const P3_COLS=[
+  {key:'country',  label:'Quốc gia',     fmt:v=>v},
+  {key:'orders',   label:'Số đơn',       fmt:v=>v.toLocaleString()},
+  {key:'kg',       label:'Tổng KG',      fmt:v=>v>=1000?(v/1000).toFixed(1)+'K':v},
+  {key:'kgPhu',    label:'KG Phụ kiện',  fmt:v=>v>=1000?(v/1000).toFixed(1)+'K':v},
+  {key:'dt',       label:'Tổng DT',      fmt:fmtM},
+  {key:'dtPhu',    label:'DT Phụ kiện',  fmt:fmtM},
+  {key:'ship',     label:'Phí ship',     fmt:fmtM},
+  {key:'disc',     label:'Discount',     fmt:fmtM},
+  {key:'cono',     label:'Công nợ',      fmt:fmtM},
+  {key:'dtThuc',   label:'DT Thực',      fmt:fmtM},
+  {key:'lastOrder',label:'Đơn gần nhất', fmt:v=>v||'—'},
+  {key:'avgDays',  label:'TB phát đơn',  fmt:v=>v||'—'},
+];
+function fmtM(v){
+  if(!v||v===0)return'<span style="color:#bbb;">—</span>';
+  if(v>=1e9)return(v/1e9).toFixed(2)+'T';
+  if(v>=1e6)return(v/1e6).toFixed(1)+'M';
+  return(v/1000).toFixed(0)+'K';
+}
+
+function buildP3Matrix(){
+  const thead=document.getElementById('p3MatrixHead');
+  const BCOL='#3b6fd4';
+  thead.innerHTML=`<tr style="background:${BCOL};color:#fff;">
+    <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;white-space:nowrap;position:sticky;left:0;background:${BCOL};min-width:180px;">Thương hiệu / KH / Đơn</th>
+    ${P3_COLS.map(c=>`<th style="padding:9px 8px;text-align:right;font-size:11px;font-weight:700;white-space:nowrap;">${c.label}</th>`).join('')}
+  </tr>`;
+  renderP3Matrix();
+}
+
+function renderP3Matrix(){
+  const tbody=document.getElementById('p3MatrixBody');
+  let rows='';
+  window.p3MatrixData.forEach(brand=>{
+    const bOpen=p3State[brand.name].open;
+    const icon=bOpen?'▼':'▶';
+    const bg='#eff4ff';
+    rows+=`<tr style="background:${bg};cursor:pointer;border-bottom:2px solid #3b6fd430;" onclick="p3ToggleBrand('${brand.name.replace(/'/g,"\'")}')">
+      <td style="padding:9px 12px;font-weight:700;font-size:12px;position:sticky;left:0;background:${bg};white-space:nowrap;">
+        <span style="color:#3b6fd4;margin-right:6px;font-size:10px;">${icon}</span>${brand.name}
+      </td>
+      ${P3_COLS.map(c=>`<td style="padding:9px 8px;text-align:right;font-weight:700;font-size:12px;">${c.fmt(brand[c.key])}</td>`).join('')}
+    </tr>`;
+    if(bOpen){
+      brand.children.forEach((cust,ci)=>{
+        const cOpen=p3State[brand.name].cust[cust.name];
+        const cIcon=cOpen?'▼':'▶';
+        const cbg='#fff';
+        rows+=`<tr style="background:${cbg};cursor:pointer;border-bottom:1px solid #e8f0ff;" onclick="p3ToggleCust('${brand.name.replace(/'/g,"\'")}','${cust.name.replace(/'/g,"\'")}')">
+          <td style="padding:8px 12px 8px 28px;font-weight:600;font-size:11.5px;position:sticky;left:0;background:${cbg};white-space:nowrap;">
+            <span style="color:#6690d8;margin-right:6px;font-size:10px;">${cIcon}</span>${cust.name}
+          </td>
+          ${P3_COLS.map(c=>`<td style="padding:8px 8px;text-align:right;font-size:11.5px;font-weight:600;color:#1a2a5a;">${c.fmt(cust[c.key])}</td>`).join('')}
+        </tr>`;
+        if(cOpen){
+          cust.children.forEach((ord,oi)=>{
+            const obg=oi%2===0?'#fafcff':'#fff';
+            rows+=`<tr style="background:${obg};border-bottom:1px solid #f0f4ff;">
+              <td style="padding:6px 12px 6px 48px;font-size:11px;color:#4a5a8a;position:sticky;left:0;background:${obg};white-space:nowrap;">
+                <span style="color:#ccc;margin-right:5px;">└</span><span style="font-family:monospace;color:#3b6fd4;">${ord.name}</span>
+              </td>
+              ${P3_COLS.map(c=>`<td style="padding:6px 8px;text-align:right;font-size:11px;color:#2a3a6a;">${c.fmt(ord[c.key])}</td>`).join('')}
+            </tr>`;
+          });
+        }
+      });
+      // subtotal brand
+      rows+=`<tr style="background:#dce8ff;border-bottom:2px solid #3b6fd440;">
+        <td style="padding:7px 12px 7px 28px;font-weight:700;font-size:11px;color:#1a3a9a;position:sticky;left:0;background:#dce8ff;white-space:nowrap;">Tổng ${brand.name}</td>
+        ${P3_COLS.map(c=>`<td style="padding:7px 8px;text-align:right;font-weight:700;font-size:11px;color:#1a3a9a;">${c.fmt(brand[c.key])}</td>`).join('')}
+      </tr>`;
+    }
+  });
+  // Grand total
+  const gt={country:'—',orders:0,kg:0,kgPhu:0,dt:0,dtPhu:0,ship:0,disc:0,cono:0,dtThuc:0,lastOrder:'—',avgDays:'—'};
+  window.p3MatrixData.forEach(b=>{['orders','kg','kgPhu','dt','dtPhu','ship','disc','cono','dtThuc'].forEach(k=>{gt[k]+=b[k];});});
+  rows+=`<tr style="background:#3b6fd4;">
+    <td style="padding:10px 12px;font-weight:800;font-size:12px;color:#fff;position:sticky;left:0;background:#3b6fd4;white-space:nowrap;">Tổng cộng</td>
+    ${P3_COLS.map(c=>`<td style="padding:10px 8px;text-align:right;font-weight:800;font-size:12px;color:#fff;">${c.fmt(gt[c.key])}</td>`).join('')}
+  </tr>`;
+  tbody.innerHTML=rows;
+}
+
+function p3ToggleBrand(n){p3State[n].open=!p3State[n].open;renderP3Matrix();}
+function p3ToggleCust(b,c){p3State[b].cust[c]=!p3State[b].cust[c];renderP3Matrix();}
+function p3ExpandAll(){window.p3MatrixData.forEach(b=>{p3State[b.name].open=true;b.children.forEach(c=>{p3State[b.name].cust[c.name]=true;});});renderP3Matrix();}
+function p3CollapseAll(){window.p3MatrixData.forEach(b=>{p3State[b.name].open=false;b.children.forEach(c=>{p3State[b.name].cust[c.name]=false;});});renderP3Matrix();}
+
+
+// ══════════════ PAGE 4: MARKETING ══════════════
+const mktMonths=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+const mktData={
+  lead:     [820,890,1050,1200,1480,1820,1560,1380,1620,1740,1480,1340],
+  cpLead:   [42,44,41,40,38,36,40,43,39,37,40,42],
+  cpOrder:  [118,122,115,112,108,102,115,120,110,105,112,118],
+  roas:     [6.2,6.8,7.4,8.1,9.2,11.5,8.8,8.2,9.5,10.1,8.9,7.8],
+  cvr:      [15.2,16.1,17.4,18.2,19.8,21.5,18.8,17.2,19.5,20.1,18.9,17.8],
+  qualPct:  [78,75,80,82,85,88,82,79,84,86,83,80],
+};
+const mktColors={
+  lead:'#e91e8c', cpLead:'#e53030', cpOrder:'#f472b6', roas:'#d4960a', cvr:'#0ab5a0'
+};
+const mktLabels={
+  lead:'Lead', cpLead:'CP/Lead (K)', cpOrder:'CP/Đơn (K)', roas:'ROAS', cvr:'CVR (%)'
+};
+
+let mktLineInst, mktStackedInst, mktDonutInst, mktRadarInst;
+
+// ── Lead + DT theo thời gian ──
+let mktLeadDtTimeInst, mktLeadDtChannelInst;
+const mktRevByMonth=[198,215,268,312,378,465,398,372,420,445,388,342];
+const mktChannels={
+  names:['Facebook','Instagram','TikTok','WhatsApp','Web'],
+  leads:[3820,2650,2100,1860,2150],
+  rev:  [1050,720,580,490,580],
+  colors:['#3b6fd4','#d4960a','#e91e8c','#0ab5a0','#6b3fa0']
+};
+
+// Chi phí MKT theo tháng (triệu)
+const mktCostByMonth=[38,41,44,50,58,72,62,55,65,68,58,52];
+const mktCostByChannel=[85,62,48,38,45]; // FB, IG, TikTok, WhatsApp, Web
+
+function buildMktLeadDtTime(){
+  if(mktLeadDtTimeInst)mktLeadDtTimeInst.destroy();
+  mktLeadDtTimeInst=new Chart(document.getElementById('mktLeadDtTime'),{
+    data:{labels:mktMonths,datasets:[
+      {type:'bar', label:'Số Lead', data:mktData.lead, backgroundColor:'rgba(233,30,140,0.55)', borderRadius:3, yAxisID:'yL', borderSkipped:false},
+      {type:'line',label:'Chi phí (triệu)', data:mktCostByMonth, borderColor:'#d4960a', borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#d4960a', tension:0.4, yAxisID:'yR', fill:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:TK,font:{size:11},autoSkip:false},grid:{color:GR}},
+        yL:{position:'left', ticks:{color:'#e91e8c',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'K':v}, grid:{color:GR}},
+        yR:{position:'right',ticks:{color:'#d4960a',font:{size:10},callback:v=>v+'M'}, grid:{drawOnChartArea:false}}
+      }}
+  });
+}
+
+function buildMktLeadDtChannel(){
+  if(mktLeadDtChannelInst)mktLeadDtChannelInst.destroy();
+  mktLeadDtChannelInst=new Chart(document.getElementById('mktLeadDtChannel'),{
+    data:{labels:mktChannels.names,datasets:[
+      {type:'bar', label:'Số Lead', data:mktChannels.leads, backgroundColor:mktChannels.colors.map(c=>c+'99'), borderRadius:4, yAxisID:'yL', borderSkipped:false},
+      {type:'line',label:'Chi phí (triệu)', data:mktCostByChannel, borderColor:'#d4960a', borderWidth:2.5, pointRadius:6, pointBackgroundColor:mktChannels.colors, tension:0.3, yAxisID:'yR', fill:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:TK,font:{size:11}},grid:{color:GR}},
+        yL:{position:'left', ticks:{color:'#e91e8c',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'K':v}, grid:{color:GR}},
+        yR:{position:'right',ticks:{color:'#d4960a',font:{size:10},callback:v=>v+'M'}, grid:{drawOnChartArea:false}}
+      }}
+  });
+}
+
+function buildMktLine(){
+  const key=document.getElementById('mktMetricSel').value;
+  const col=mktColors[key];
+  const suffixMap={cpOrder:'K',cpLead:'K',roas:'x',cvr:'%'};
+  if(mktLineInst)mktLineInst.destroy();
+  mktLineInst=new Chart(document.getElementById('mktLineChart'),{
+    type:'line',
+    data:{labels:mktMonths,datasets:[{
+      label:mktLabels[key], data:mktData[key],
+      borderColor:col, borderWidth:2.5, pointRadius:4, pointBackgroundColor:col,
+      tension:0.4, fill:true, backgroundColor:col+'18'
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw}${suffixMap[key]||''}`}}},
+      scales:{
+        x:{ticks:{color:TK,font:{size:11},autoSkip:false},grid:{color:GR}},
+        y:{ticks:{color:col,font:{size:10},callback:v=>v+(suffixMap[key]||'')},grid:{color:GR}}
+      }}
+  });
+}
+
+function buildMktStacked(){
+  const qual=mktData.qualPct;
+  const disq=qual.map(v=>100-v);
+  if(mktStackedInst)mktStackedInst.destroy();
+  mktStackedInst=new Chart(document.getElementById('mktStackedChart'),{
+    type:'bar',
+    data:{labels:mktMonths,datasets:[
+      {label:'Qualified',    data:qual, backgroundColor:'rgba(59,111,212,0.75)', stack:'s'},
+      {label:'Disqualified', data:disq, backgroundColor:'rgba(220,80,80,0.6)',   stack:'s'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw}%`}}},
+      scales:{
+        x:{ticks:{color:TK,font:{size:11}},grid:{color:GR},stacked:true},
+        y:{ticks:{color:TK,font:{size:10},callback:v=>v+'%'},grid:{color:GR},stacked:true,min:0,max:100}
+      }}
+  });
+}
+
+function buildMktFunnel(){
+  const stages=[
+    {label:'Lead (Qualified)', pct:100, bg:'#e91e8c', val:'12,580'},
+    {label:'Reply',            pct:63,  bg:'#d4158a', val:'7,926'},
+    {label:'Tư vấn báo giá',  pct:34,  bg:'#42a5f5', val:'4,277'},
+    {label:'Invoice chờ',     pct:23,  bg:'#3b6fd4', val:'2,894'},
+    {label:'Đã thanh toán',   pct:19,  bg:'#1565c0', val:'2,389'},
+  ];
+  document.getElementById('mktFunnel').innerHTML=stages.map(f=>`
+    <div class="funnel-row">
+      <div class="funnel-label-col">${f.label}</div>
+      <div class="funnel-track">
+        <div class="funnel-fill" style="width:${f.pct}%;background:${f.bg};">
+          <span class="funnel-pct">${f.pct}%</span>
+        </div>
+      </div>
+      <div class="funnel-right" style="color:${f.bg};font-weight:600;">${f.val}</div>
+    </div>`).join('');
+}
+
+function buildMktDonut(){
+  const totalLeads=mktData.lead.reduce((a,v)=>a+v,0);
+  const srcData=[
+    {label:'Ads',     val:Math.round(totalLeads*0.60), color:'#e91e8c'},
+    {label:'Organic', val:Math.round(totalLeads*0.40), color:'#42a5f5'},
+  ];
+  if(mktDonutInst)mktDonutInst.destroy();
+  mktDonutInst=new Chart(document.getElementById('mktDonut'),{
+    type:'doughnut',
+    data:{labels:srcData.map(s=>s.label),datasets:[{
+      data:srcData.map(s=>s.val),
+      backgroundColor:srcData.map(s=>s.color),
+      borderWidth:3, borderColor:'#fff', hoverOffset:8
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw.toLocaleString()} leads (${Math.round(ctx.raw/totalLeads*100)}%)`}}
+      }
+    }
+  });
+  document.getElementById('mktDonutLegend').innerHTML=srcData.map(s=>`
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:${s.color};">
+      <span style="width:10px;height:10px;border-radius:50%;background:${s.color};display:inline-block;flex-shrink:0;"></span>
+      ${s.label}: ${s.val.toLocaleString()} (${Math.round(s.val/totalLeads*100)}%)
+    </span>`).join('');
+}
+
+function buildMktRadar(){
+  const teams=['Team 1','Team 2','Team 3','Team 4','Team 5'];
+  const axes=['Lead','Phản hồi nhanh','Phát đơn nhanh','Tỉ lệ CĐ','ROAS'];
+  // normalised 0-100 per axis (higher = better)
+  const radarVals=[
+    [72,80,68,75,78],  // Team 1
+    [88,72,78,82,90],  // Team 2 – ROAS cao nhất
+    [60,85,72,62,65],  // Team 3 – phản hồi nhanh nhất
+    [82,68,84,88,84],  // Team 4 – CĐ cao nhất
+    [75,76,80,72,76],  // Team 5
+  ];
+  const palette=['#e91e8c','#0ab5a0','#d4960a','#3b6fd4','#6b3fa0'];
+  if(mktRadarInst)mktRadarInst.destroy();
+  mktRadarInst=new Chart(document.getElementById('mktRadar'),{
+    type:'radar',
+    data:{
+      labels:axes,
+      datasets:teams.map((t,i)=>({
+        label:t, data:radarVals[i],
+        borderColor:palette[i], borderWidth:2,
+        backgroundColor:palette[i]+'22',
+        pointBackgroundColor:palette[i], pointRadius:4,
+      }))
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{r:{
+        min:0,max:100,
+        ticks:{stepSize:25,color:TK,font:{size:9},backdropColor:'transparent'},
+        grid:{color:'rgba(0,0,0,0.08)'},
+        angleLines:{color:'rgba(0,0,0,0.1)'},
+        pointLabels:{color:'#5a5a7a',font:{size:11,weight:'600'}}
+      }}
+    }
+  });
+  // legend
+  document.getElementById('radarLegend').innerHTML=teams.map((t,i)=>`<span class="legend-item"><span class="legend-dot" style="background:${palette[i]};border-radius:50%;"></span>${t}</span>`).join('');
+}
+
+// ── MKT MATRIX DATA ──
+(function genMktMatrix(){
+  const brands=[
+    {name:'Team 1',nvs:['Nguyễn Văn A','Trần Thị B','Lê Minh C','Phạm Thị D']},
+    {name:'Team 2',nvs:['Hoàng Văn E','Vũ Thị F','Đặng Văn G','Bùi Thị H','Ngô Văn I']},
+    {name:'Team 3',nvs:['Đỗ Thị J','Trịnh Văn K','Lý Thị L','Phan Văn M']},
+  ];
+  const rand=(a,b)=>+(a+(b-a)*Math.random()).toFixed(2);
+  const randI=(a,b)=>Math.round(a+(b-a)*Math.random());
+  window.mktMatrixData=[];
+  brands.forEach(br=>{
+    const bRow={type:'brand',name:br.name,children:[],leads:0,cvr:0,respTime:0,orderTime:0};
+    br.nvs.forEach(nv=>{
+      const leads=randI(80,420);
+      const cvr=rand(12,28);
+      const respTime=rand(0.5,4.8);
+      const orderTime=rand(2.5,18.0);
+      bRow.children.push({type:'nv',name:nv,parent:br.name,leads,cvr,respTime,orderTime});
+      bRow.leads+=leads;
+    });
+    bRow.cvr=+( bRow.children.reduce((a,v)=>a+v.cvr,0)/bRow.children.length ).toFixed(2);
+    bRow.respTime=+( bRow.children.reduce((a,v)=>a+v.respTime,0)/bRow.children.length ).toFixed(2);
+    bRow.orderTime=+( bRow.children.reduce((a,v)=>a+v.orderTime,0)/bRow.children.length ).toFixed(2);
+    window.mktMatrixData.push(bRow);
+  });
+})();
+
+const mktState={};
+window.mktMatrixData.forEach(b=>{mktState[b.name]={open:false};});
+
+const MKT_COLS=[
+  {key:'leads',     label:'Số Lead',         fmt:v=>v.toLocaleString()},
+  {key:'cvr',       label:'Tỉ lệ CĐ (%)',    fmt:v=>v.toFixed(1)+'%'},
+  {key:'respTime',  label:'TG xử lý (giờ)',  fmt:v=>v.toFixed(1)+'h'},
+  {key:'orderTime', label:'TG phát đơn (ngày)',fmt:v=>v.toFixed(1)+'d'},
+];
+
+function buildMktMatrix(){
+  const thead=document.getElementById('mktMatrixHead');
+  const AC='#d4960a';
+  thead.innerHTML=`<tr style="background:#1a1a2e;color:#fff;">
+    <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;white-space:nowrap;position:sticky;left:0;background:#1a1a2e;min-width:180px;">Team / Nhân viên</th>
+    ${MKT_COLS.map(c=>`<th style="padding:9px 10px;text-align:right;font-size:11px;font-weight:700;white-space:nowrap;">${c.label}</th>`).join('')}
+  </tr>`;
+  renderMktMatrix();
+}
+
+function renderMktMatrix(){
+  const tbody=document.getElementById('mktMatrixBody');
+  let rows='';
+  window.mktMatrixData.forEach(brand=>{
+    const open=mktState[brand.name].open;
+    const bg='#fff8ee';
+    rows+=`<tr style="background:${bg};cursor:pointer;border-bottom:2px solid #d4960a30;" onclick="mktToggle('${brand.name.replace(/'/g,"\'")}')">
+      <td style="padding:9px 12px;font-weight:700;font-size:12px;position:sticky;left:0;background:${bg};white-space:nowrap;">
+        <span style="color:#d4960a;margin-right:6px;font-size:10px;">${open?'▼':'▶'}</span>${brand.name}
+      </td>
+      ${MKT_COLS.map(c=>`<td style="padding:9px 10px;text-align:right;font-weight:700;font-size:12px;">${c.fmt(brand[c.key])}</td>`).join('')}
+    </tr>`;
+    if(open){
+      brand.children.forEach((nv,ni)=>{
+        const bg2=ni%2===0?'#fff':'#fffdf8';
+        // Color-code CVR
+        const cvrColor=nv.cvr>=22?'#12a372':nv.cvr>=16?'#d4960a':'#e53030';
+        rows+=`<tr style="background:${bg2};border-bottom:1px solid #f5e8d0;">
+          <td style="padding:8px 12px 8px 28px;font-size:11.5px;font-weight:600;position:sticky;left:0;background:${bg2};white-space:nowrap;">${nv.name}</td>
+          <td style="padding:8px 10px;text-align:right;font-size:11.5px;">${nv.leads.toLocaleString()}</td>
+          <td style="padding:8px 10px;text-align:right;font-size:11.5px;font-weight:700;color:${cvrColor};">${nv.cvr.toFixed(1)}%</td>
+          <td style="padding:8px 10px;text-align:right;font-size:11.5px;">${nv.respTime.toFixed(1)}h</td>
+          <td style="padding:8px 10px;text-align:right;font-size:11.5px;">${nv.orderTime.toFixed(1)}d</td>
+        </tr>`;
+      });
+      rows+=`<tr style="background:#fde8c0;border-bottom:2px solid #d4960a40;">
+        <td style="padding:7px 12px 7px 28px;font-weight:700;font-size:11px;color:#9a6000;position:sticky;left:0;background:#fde8c0;">Tổng ${brand.name}</td>
+        ${MKT_COLS.map(c=>`<td style="padding:7px 10px;text-align:right;font-weight:700;font-size:11px;color:#9a6000;">${c.fmt(brand[c.key])}</td>`).join('')}
+      </tr>`;
+    }
+  });
+  // Grand total
+  const gt={leads:0,cvr:0,respTime:0,orderTime:0};
+  window.mktMatrixData.forEach(b=>{gt.leads+=b.leads;gt.cvr+=b.cvr;gt.respTime+=b.respTime;gt.orderTime+=b.orderTime;});
+  const n=window.mktMatrixData.length;
+  gt.cvr/=n; gt.respTime/=n; gt.orderTime/=n;
+  rows+=`<tr style="background:#1a1a2e;">
+    <td style="padding:10px 12px;font-weight:800;font-size:12px;color:#fff;position:sticky;left:0;background:#1a1a2e;">Tổng cộng</td>
+    ${MKT_COLS.map(c=>`<td style="padding:10px 10px;text-align:right;font-weight:800;font-size:12px;color:#fff;">${c.fmt(gt[c.key])}</td>`).join('')}
+  </tr>`;
+  tbody.innerHTML=rows;
+}
+
+function mktToggle(n){mktState[n].open=!mktState[n].open;renderMktMatrix();}
+function mktExpandAll(){window.mktMatrixData.forEach(b=>{mktState[b.name].open=true;});renderMktMatrix();}
+function mktCollapseAll(){window.mktMatrixData.forEach(b=>{mktState[b.name].open=false;});renderMktMatrix();}
+
+function buildSparkline(elId, data, color, filled){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  const W=el.offsetWidth||200, H=el.offsetHeight||60;
+  const N=data.length, mx=Math.max(...data), mn=Math.min(...data);
+  const range=mx-mn||1;
+  const pad=4;
+  const pts=data.map((v,i)=>{
+    const x=pad+i*(W-pad*2)/(N-1);
+    const y=H-pad-(v-mn)/range*(H-pad*2);
+    return [x,y];
+  });
+  const lineD=pts.map((p,i)=>(i===0?`M${p[0]},${p[1]}`:`L${p[0]},${p[1]}`)).join(' ');
+  const areaD=`${lineD} L${pts[N-1][0]},${H-pad} L${pts[0][0]},${H-pad} Z`;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" style="display:block;">
+    ${filled?`<path d="${areaD}" fill="${color}22"/>` :''}
+    <path d="${lineD}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
+    ${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="2.5" fill="${color}"/>`).join('')}
+  </svg>`;
+  el.innerHTML=svg;
+}
+
+function buildMktLeadQDQ(){
+  const qual=mktData.qualPct.map((p,i)=>Math.round(mktData.lead[i]*p/100));
+  const disq=mktData.lead.map((v,i)=>v-qual[i]);
+  buildSparkline('mktLeadQDQ',  mktData.lead, '#e91e8c', true);
+  buildSparkline('mktQualChart',  qual,         '#3b6fd4', true);
+  buildSparkline('mktDisqChart',  disq,         '#dc5050', true);
+}
+
+function buildMktLeadDecomp2(){
+  const el=document.getElementById('mktLeadDecomp');
+  const decompLead={
+    total:12580,
+    sources:[
+      {name:'Ads', value:7548, pct:60, color:'#e91e8c',
+        channels:[
+          {name:'Facebook',  value:2694, pct:36, color:'#3b6fd4'},
+          {name:'Instagram', value:1887, pct:25, color:'#d4960a'},
+          {name:'WhatsApp',  value:1132, pct:15, color:'#0ab5a0'},
+          {name:'Web',       value:1132, pct:15, color:'#6b3fa0'},
+          {name:'TikTok',    value: 703, pct: 9, color:'#e53030'},
+        ]
+      },
+      {name:'Organic', value:5032, pct:40, color:'#42a5f5',
+        channels:[
+          {name:'Facebook',  value:1761, pct:35, color:'#3b6fd4'},
+          {name:'Instagram', value:1258, pct:25, color:'#d4960a'},
+          {name:'WhatsApp',  value: 906, pct:18, color:'#0ab5a0'},
+          {name:'Web',       value: 805, pct:16, color:'#6b3fa0'},
+          {name:'TikTok',    value: 302, pct: 6, color:'#e53030'},
+        ]
+      }
+    ]
+  };
+  function fmtL(v){return v>=1000?(v/1000).toFixed(1)+'K':v;}
+  const maxSrc=Math.max(...decompLead.sources.map(s=>s.value));
+  const maxCh=Math.max(...decompLead.sources.flatMap(s=>s.channels.map(c=>c.value)));
+  const svgH=320; const svgW=480;
+  const rX=8, srcX=118, chX=268;
+  const rootCy=svgH/2;
+
+  // compute vertical positions
+  const allCh=decompLead.sources.flatMap(s=>s.channels.map(c=>({...c,srcName:s.name})));
+  const ROW_H=svgH/allCh.length;
+  const chCy=allCh.map((_,i)=>ROW_H*i+ROW_H/2);
+  let ci=0;
+  const srcCy=decompLead.sources.map(s=>{
+    const start=ci; const end=ci+s.channels.length-1;
+    ci+=s.channels.length;
+    return (chCy[start]+chCy[end])/2;
+  });
+
+  let svg='';
+  // root → sources
+  decompLead.sources.forEach((s,i)=>{svg+=`<path d="M${rX+100},${rootCy} C${(rX+100+srcX)/2},${rootCy} ${(rX+100+srcX)/2},${srcCy[i]} ${srcX},${srcCy[i]}" fill="none" stroke="#ddd" stroke-width="1.5"/>`;});
+  // source → channels
+  let cci=0;
+  decompLead.sources.forEach((s,si)=>{
+    s.channels.forEach((_,ci2)=>{
+      svg+=`<path d="M${srcX+90},${srcCy[si]} C${(srcX+90+chX)/2},${srcCy[si]} ${(srcX+90+chX)/2},${chCy[cci]} ${chX},${chCy[cci]}" fill="none" stroke="#ddd" stroke-width="1.2"/>`;
+      cci++;
+    });
+  });
+
+  let html=`<div style="position:relative;min-width:${svgW}px;height:${svgH}px;">
+  <svg style="position:absolute;top:0;left:0;width:100%;height:${svgH}px;pointer-events:none;" xmlns="http://www.w3.org/2000/svg">${svg}</svg>
+  <!-- ROOT -->
+  <div style="position:absolute;left:${rX}px;top:${rootCy-28}px;width:98px;">
+    <div style="background:#fff;border:1px solid #d8d8e8;border-radius:4px;padding:7px 9px;box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+      <div style="font-size:9px;color:#888;font-weight:500;margin-bottom:1px;">Tổng Lead</div>
+      <div style="font-size:15px;font-weight:800;color:#1a1a2e;">${fmtL(decompLead.total)}</div>
+      <div style="height:3px;background:#e91e8c;border-radius:2px;margin-top:4px;"></div>
+    </div>
+  </div>`;
+
+  // source nodes
+  decompLead.sources.forEach((s,si)=>{
+    const bw=Math.round(s.value/maxSrc*100);
+    html+=`<div style="position:absolute;left:${srcX}px;top:${srcCy[si]-26}px;width:88px;">
+      <div style="background:#fff;border:1px solid #d8d8e8;border-radius:4px;padding:6px 8px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+        <div style="font-size:9px;color:#888;font-weight:500;">${s.name}</div>
+        <div style="font-size:13px;font-weight:800;color:#1a1a2e;">${fmtL(s.value)}</div>
+        <div style="height:3px;background:#eee;border-radius:2px;margin-top:3px;"><div style="width:${bw}%;height:100%;background:${s.color};border-radius:2px;"></div></div>
+        <div style="font-size:9px;color:${s.color};font-weight:700;margin-top:1px;">${s.pct}%</div>
+      </div>
+    </div>`;
+  });
+
+  // channel nodes
+  allCh.forEach((ch,i)=>{
+    const bw=Math.round(ch.value/maxCh*100);
+    html+=`<div style="position:absolute;left:${chX}px;top:${Math.round(chCy[i]-18)}px;width:126px;">
+      <div style="background:#fff;border:1px solid #d8d8e8;border-radius:4px;padding:4px 8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);display:flex;align-items:center;gap:6px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:9px;color:#555;font-weight:600;">${ch.name} <span style="color:#aaa;font-size:8px;">${ch.srcName}</span></div>
+          <div style="font-size:11px;font-weight:800;color:#1a1a2e;">${fmtL(ch.value)}</div>
+          <div style="height:2px;background:#eee;border-radius:1px;margin-top:2px;"><div style="width:${bw}%;height:100%;background:#2196f3;border-radius:1px;"></div></div>
+        </div>
+        <div style="font-size:10px;color:#2196f3;font-weight:700;">${ch.pct}%</div>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+
+// ── MKT SUB-TAB LOGIC ──
+const teamNames=['Team 1','Team 2','Team 3','Team 4','Team 5'];
+const teamColors4=['#e91e8c','#0ab5a0','#d4960a','#3b6fd4','#6b3fa0'];
+const teamMktData={
+  leads:     [2180, 2950, 2420, 1890, 3140],
+  qualified: [1700, 2390, 1850, 1420, 2566],
+  cvr:       [18.2, 22.8, 16.5, 19.4, 21.1],   // %
+  respTime:  [2.1,  1.4,  3.2,  2.8,  1.8],     // giờ
+  orderTime: [5.2,  3.8,  7.1,  6.4,  4.5],     // ngày
+  roas:      [7.8, 10.2,  6.9,  8.4,  9.1],     // x
+};
+
+let tLC,tCVR,tRT,tOT,tROAS;
+
+function buildTeamKpiGrid(){
+  const grid=document.getElementById('teamKpiGrid');
+  if(!grid)return;
+  grid.innerHTML=teamNames.map((t,i)=>`
+    <div class="chart-card" style="border-top:3px solid ${teamColors4[i]};padding:12px 14px;">
+      <div style="font-size:11px;font-weight:700;color:${teamColors4[i]};margin-bottom:6px;">${t}</div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;"><span style="color:var(--text3);">Lead</span><span style="font-weight:700;">${teamMktData.leads[i].toLocaleString()}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;"><span style="color:var(--text3);">CVR</span><span style="font-weight:700;color:${teamMktData.cvr[i]>=20?'#12a372':'#d4960a'};">${teamMktData.cvr[i]}%</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;"><span style="color:var(--text3);">Phản hồi</span><span style="font-weight:700;">${teamMktData.respTime[i]}h</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;"><span style="color:var(--text3);">Ra đơn</span><span style="font-weight:700;">${teamMktData.orderTime[i]}d</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;"><span style="color:var(--text3);">ROAS</span><span style="font-weight:700;color:${teamColors4[i]};">${teamMktData.roas[i]}x</span></div>
+      </div>
+    </div>`).join('');
+}
+
+function buildTeamCharts(){
+  // shared horizontal bar option builder
+  function hOpts(xCb,tipCb,xExtra){
+    return {
+      indexAxis:'y',
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:tipCb}}},
+      scales:{
+        x:{ticks:{color:TK,font:{size:11},callback:xCb}, grid:{color:GR}, ...(xExtra||{})},
+        y:{ticks:{color:'#1a1a2e',font:{size:12},weight:'bold'}, grid:{display:false}}
+      }
+    };
+  }
+
+  if(tLC)tLC.destroy();
+  tLC=new Chart(document.getElementById('teamLeadChart'),{
+    type:'bar',
+    data:{labels:teamNames,datasets:[
+      {label:'Số Lead', data:teamMktData.leads, backgroundColor:teamColors4.map(c=>c+'bb'), borderRadius:3, borderSkipped:false, barPercentage:0.55, categoryPercentage:0.8},
+    ]},
+    options:hOpts(v=>v>=1000?(v/1000).toFixed(1)+'K':v, ctx=>`Số Lead: ${ctx.raw.toLocaleString()}`)
+  });
+
+  if(tCVR)tCVR.destroy();
+  tCVR=new Chart(document.getElementById('teamCVRChart'),{
+    type:'bar',
+    data:{labels:teamNames,datasets:[{
+      label:'CVR', data:teamMktData.cvr,
+      backgroundColor:teamMktData.cvr.map(v=>v>=20?'rgba(18,163,114,0.82)':'rgba(212,150,10,0.82)'),
+      borderRadius:3, borderSkipped:false, barPercentage:0.55, categoryPercentage:0.8
+    }]},
+    options:hOpts(v=>v+'%', ctx=>`CVR: ${ctx.raw}%`, {suggestedMax:30})
+  });
+
+  if(tRT)tRT.destroy();
+  tRT=new Chart(document.getElementById('teamRespChart'),{
+    type:'bar',
+    data:{labels:teamNames,datasets:[{
+      label:'Phản hồi', data:teamMktData.respTime,
+      backgroundColor:teamMktData.respTime.map(v=>v<=2?'rgba(18,163,114,0.82)':v<=3?'rgba(212,150,10,0.82)':'rgba(229,48,48,0.82)'),
+      borderRadius:3, borderSkipped:false, barPercentage:0.55, categoryPercentage:0.8
+    }]},
+    options:hOpts(v=>v+'h', ctx=>`${ctx.raw}h`)
+  });
+
+  if(tOT)tOT.destroy();
+  tOT=new Chart(document.getElementById('teamOrderTimeChart'),{
+    type:'bar',
+    data:{labels:teamNames,datasets:[{
+      label:'Ra đơn', data:teamMktData.orderTime,
+      backgroundColor:teamMktData.orderTime.map(v=>v<=4?'rgba(18,163,114,0.82)':v<=6?'rgba(212,150,10,0.82)':'rgba(229,48,48,0.82)'),
+      borderRadius:3, borderSkipped:false, barPercentage:0.55, categoryPercentage:0.8
+    }]},
+    options:hOpts(v=>v+'d', ctx=>`${ctx.raw} ngày`)
+  });
+
+  if(tROAS)tROAS.destroy();
+  tROAS=new Chart(document.getElementById('teamROASChart'),{
+    type:'bar',
+    data:{labels:teamNames,datasets:[{
+      label:'ROAS', data:teamMktData.roas,
+      backgroundColor:teamColors4.map(c=>c+'bb'),
+      borderRadius:3, borderSkipped:false, barPercentage:0.55, categoryPercentage:0.8
+    }]},
+    options:hOpts(v=>v+'x', ctx=>`ROAS: ${ctx.raw}x`, {suggestedMin:5})
+  });
+}
+
+function showMktSub(n){
+  document.getElementById('mktSub1').style.display=n===1?'block':'none';
+  document.getElementById('mktSub2').style.display=n===2?'block':'none';
+  document.getElementById('mktSubTab1').style.cssText=n===1
+    ?'padding:10px 20px;border:none;border-bottom:3px solid #d4960a;background:transparent;color:#d4960a;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:-2px;'
+    :'padding:10px 20px;border:none;border-bottom:3px solid transparent;background:transparent;color:#9a9aaa;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:-2px;';
+  document.getElementById('mktSubTab2').style.cssText=n===2
+    ?'padding:10px 20px;border:none;border-bottom:3px solid #d4960a;background:transparent;color:#d4960a;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:-2px;'
+    :'padding:10px 20px;border:none;border-bottom:3px solid transparent;background:transparent;color:#9a9aaa;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:-2px;';
+  if(n===2){setTimeout(()=>{buildTeamKpiGrid();buildTeamCharts();},50);}
+}
+
+function buildAllP4(){
+  buildMktLeadQDQ();
+  buildMktFunnel();
+  buildMktLeadDecomp2();
+  buildMktLine();
+  buildMktMatrix();
+}
+
+function showPage(n){
+  [1,2,3,4,5].forEach(i=>{
+    const el=document.getElementById('page'+i);
+    if(el)el.style.display=n===i?'block':'none';
+    const tab=document.getElementById('tab'+i);
+    if(tab)tab.className=n===i?'nav-tab active':'nav-tab';
+  });
+  if(n===2)setTimeout(()=>{buildKGChart();buildHeatmap2();buildDecomp();buildMatrix();},50);
+  if(n===3)setTimeout(()=>{buildP3Chart1();buildP3Chart2();buildP3RFMDonut();buildP3Cohorts();buildP3Matrix();},50);
+  if(n===4)setTimeout(()=>{buildAllP4();},50);
+}
+
+buildChart1(); buildChart2(); buildChart3(); buildChart4(); buildChartROAS(); buildFunnel(); buildCohort();
+</script>
+</body>
+</html>
